@@ -7,7 +7,7 @@ type Set[T comparable] struct {
 }
 
 func NewSet[T comparable](vals ...T) *Set[T] {
-	return &Set[T]{List[T](vals)}
+	return &Set[T]{vals}
 }
 
 func (s *Set[T]) Contains(val T) bool {

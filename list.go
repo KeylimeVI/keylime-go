@@ -9,6 +9,11 @@ import (
 // List is an alias of Slice that provides useful methods and ease of use
 type List[T any] []T
 
+func NewList[T any](vals ...T) *List[T] {
+	list := List[T](vals)
+	return &list
+}
+
 // Append vals to the end of the list
 func (l *List[T]) Append(vals ...T) *List[T] {
 	*l = append(*l, vals...)
