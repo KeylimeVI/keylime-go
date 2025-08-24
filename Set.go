@@ -7,7 +7,11 @@ type Set[T comparable] struct {
 }
 
 func NewSet[T comparable](vals ...T) *Set[T] {
-	return &Set[T]{vals}
+	newset := Set[T]{}
+	for _, v := range vals {
+		newset.Append(v)
+	}
+	return &newset
 }
 
 func (s *Set[T]) Contains(val T) bool {
