@@ -17,7 +17,7 @@ func main() {
 	//
 	//fmt.Println("All tests passed! ✅")
 	list := List[int]{1, 2, 3}
-	list.Append(4).Append(5).Extend(List[int]{6, 7, 8})
+	list.Append(4, 6, 2, 3432).Append(5).Extend(List[int]{6, 7, 8})
 	fmt.Println(list)
 }
 
