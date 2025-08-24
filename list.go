@@ -1,4 +1,4 @@
-package kvlist
+package kvcollections
 
 import (
 	"errors"
@@ -18,6 +18,16 @@ func (l *List[T]) Append(vals ...T) *List[T] {
 // Len returns the length of the list
 func (l *List[T]) Len() int {
 	return len(*l)
+}
+
+// Contains returns true if the list contains the value
+func Contains[T comparable](list []T, value T) bool {
+	for _, item := range list {
+		if item == value { // ✅ This now works
+			return true
+		}
+	}
+	return false
 }
 
 // Get the item at index i, or false if the index is out of bounds

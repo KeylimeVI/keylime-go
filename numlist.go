@@ -1,4 +1,4 @@
-package kvlist
+package kvcollections
 
 import "math/rand"
 
