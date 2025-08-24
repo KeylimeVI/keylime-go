@@ -6,19 +6,246 @@ import (
 )
 
 func main() {
-	//fmt.Println("Running List tests...")
-	//
-	//testAppend()
-	//testLen()
-	//testGet()
-	//testRemove()
-	//testIsEmpty()
-	//testEdgeCases()
-	//
-	//fmt.Println("All tests passed! ✅")
-	list := List[int]{1, 2, 3}
-	list.Append(4, 6, 2, 3432).Append(5).Extend(List[int]{6, 7, 8})
-	fmt.Println(list)
+	fmt.Println("\n=== Testing Set ===")
+
+	testNewSet()
+	testSetContains()
+	testSetAppend()
+	testSetExtend()
+	testSetInsert()
+	testSetSet()
+	testSetUniqueness()
+	testSetEdgeCases()
+
+	fmt.Println("All Set tests passed! ✅")
+}
+
+func testNewSet() {
+	fmt.Println("Testing NewSet...")
+
+	// Test empty set
+	emptySet := NewSet[int]()
+	if emptySet.Len() != 0 {
+		panic("Empty set should have length 0")
+	}
+
+	// Test set with values
+	set := NewSet(1, 2, 3, 2, 1) // Duplicates should be removed
+	if set.Len() != 3 {
+		panic("NewSet should remove duplicates")
+	}
+	fmt.Println("✓ NewSet works correctly")
+}
+
+func testSetContains() {
+	fmt.Println("Testing Contains...")
+
+	set := NewSet("apple", "banana", "cherry")
+
+	// Test existing values
+	if !set.Contains("apple") {
+		panic("Should contain 'apple'")
+	}
+	if !set.Contains("banana") {
+		panic("Should contain 'banana'")
+	}
+
+	// Test non-existing values
+	if set.Contains("orange") {
+		panic("Should not contain 'orange'")
+	}
+	if set.Contains("") {
+		panic("Should not contain empty string")
+	}
+	fmt.Println("✓ Contains works correctly")
+}
+
+func testSetAppend() {
+	fmt.Println("Testing Append...")
+
+	set := NewSet[int]()
+
+	// Append unique values
+	set.Append(1, 2, 3)
+	if set.Len() != 3 {
+		panic("Append should add unique values")
+	}
+	set.Append(2, 3, 4) // Only 4 should be added
+	if set.Len() != 4 || !set.Contains(4) {
+		panic("Append should not add duplicates")
+	}
+
+	// Test method chaining
+	set.Append(5).Append(6)
+	if set.Len() != 6 {
+		panic("Method chaining should work")
+	}
+	fmt.Println("✓ Append works correctly")
+}
+
+func testSetExtend() {
+	fmt.Println("Testing Extend...")
+
+	set := NewSet(1, 2, 3)
+	newValues := []int{3, 4, 5} // 3 is duplicate
+
+	// Extend with slice
+	set.Extend(newValues)
+	if set.Len() != 5 || !set.Contains(4) || !set.Contains(5) {
+		panic("Extend should add unique values from slice")
+	}
+
+	// Test that duplicates weren't added
+	count := 0
+	for _, v := range set.List {
+		if v == 3 {
+			count++
+		}
+	}
+	if count != 1 {
+		panic("Extend should not add duplicates")
+	}
+	fmt.Println("✓ Extend works correctly")
+}
+
+func testSetInsert() {
+	fmt.Println("Testing Insert...")
+
+	set := NewSet(1, 3, 5) // [1, 3, 5]
+
+	// Insert unique value at valid index
+	err := set.Insert(1, 2) // Should become [1, 2, 3, 5]
+	if err != nil {
+		panic("Insert should work at valid index")
+	}
+	if set.Len() != 4 || !set.Contains(2) {
+		panic("Insert should add unique value")
+	}
+
+	// Check position
+	if val, ok := set.Get(1); !ok || val != 2 {
+		panic("Insert should place value at correct position")
+	}
+
+	// Insert duplicate value
+	err = set.Insert(0, 1) // 1 already exists
+	if err != nil {
+		panic("Insert should not fail for duplicates, just skip them")
+	}
+	if set.Len() != 4 { // Length should not change
+		panic("Insert should not add duplicates")
+	}
+
+	// Insert at invalid index
+	err = set.Insert(10, 6)
+	if err == nil {
+		panic("Insert should fail for out-of-bounds index")
+	}
+
+	// Insert multiple values
+	set = NewSet(1, 4)        // [1, 4]
+	err = set.Insert(1, 2, 3) // Should become [1, 2, 3, 4]
+	if err != nil || set.Len() != 4 {
+		panic("Insert with multiple values should work")
+	}
+	fmt.Println("✓ Insert works correctly")
+}
+
+func testSetSet() {
+	fmt.Println("Testing Set...")
+
+	set := NewSet(1, 2, 3) // [1, 2, 3]
+
+	// Set with unique value
+	err := set.Set(1, 4) // Should set index 1 to 4: [1, 4, 3]
+	if err != nil {
+		panic("Set should work with unique value")
+	}
+	if !set.Contains(4) || set.Contains(2) {
+		panic("Set should replace value and maintain uniqueness")
+	}
+
+	// Set with duplicate value
+	err = set.Set(0, 3) // Try to set index 0 to 3 (which already exists at index 2)
+	if err != nil {
+		panic("Set should not fail for duplicates, just skip")
+	}
+	// Value should not change
+	if val, ok := set.Get(0); !ok || val != 1 {
+		panic("Set should not change value if duplicate")
+	}
+
+	// Set at invalid index
+	err = set.Set(10, 5)
+	if err == nil {
+		panic("Set should fail for out-of-bounds index")
+	}
+	fmt.Println("✓ Set works correctly")
+}
+
+func testSetUniqueness() {
+	fmt.Println("Testing Uniqueness...")
+
+	set := NewSet(1, 2, 3, 2, 1, 3, 2, 1)
+
+	// Check that only unique values exist
+	if set.Len() != 3 {
+		panic("Set should maintain uniqueness")
+	}
+
+	// Count occurrences of each value
+	counts := make(map[int]int)
+	for _, v := range set.List {
+		counts[v]++
+	}
+
+	for _, count := range counts {
+		if count != 1 {
+			panic("Each value should appear exactly once")
+		}
+	}
+	fmt.Println("✓ Uniqueness is maintained")
+}
+
+func testSetEdgeCases() {
+	fmt.Println("Testing Edge Cases...")
+
+	// Test empty set operations
+	emptySet := NewSet[int]()
+	if emptySet.Contains(1) {
+		panic("Empty set should not contain anything")
+	}
+
+	// Test with different types
+	stringSet := NewSet("a", "b", "a", "c")
+	if stringSet.Len() != 3 {
+		panic("String set should maintain uniqueness")
+	}
+
+	// Test with struct values
+	type Point struct{ X, Y int }
+	pointSet := NewSet(Point{1, 2}, Point{1, 2}, Point{3, 4})
+	if pointSet.Len() != 2 { // Duplicate Point{1, 2} should be removed
+		panic("Struct set should maintain uniqueness")
+	}
+
+	// Test method inheritance from List
+	set := NewSet(1, 2, 3)
+	if set.Len() != 3 {
+		panic("Should inherit Len method from List")
+	}
+
+	// Test that we can still use List methods
+	set.List.Append(4) // Bypass Set's uniqueness check
+	if set.Len() != 4 {
+		panic("Should be able to use embedded List methods")
+	}
+	// But this breaks uniqueness!
+	set.List.Append(4) // Add duplicate directly
+	if set.Len() != 5 {
+		panic("Direct List access should bypass uniqueness")
+	}
+	fmt.Println("✓ Edge cases handled correctly")
 }
 
 func testAppend() {
