@@ -6,7 +6,7 @@ import (
 	"math/rand"
 )
 
-// List is a wrapper around Slice that provides useful methods and ease of use
+// List is an alias of Slice that provides useful methods and ease of use
 type List[T any] []T
 
 // Append vals to the end of the list
