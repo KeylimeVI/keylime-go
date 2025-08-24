@@ -179,3 +179,14 @@ func (l *List[T]) Copy() List[T] {
 	copy(c, *l)
 	return c
 }
+
+// Index returns a new list containing the elements from start (inclusive) to end (exclusive)
+func (l *List[T]) Index(start int, end int) (List[T], error) {
+	if !l.ValidIndex(start) || !l.ValidIndex(end) {
+		return nil, errors.New("invalid index")
+	}
+	if end < start {
+		return nil, errors.New("end index must be greater than start index")
+	}
+	return (*l)[start:end], nil
+}
