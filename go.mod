@@ -1,3 +1,3 @@
-module github.com/KeylimeVI/klvgc/v1.0.4
+module github.com/KeylimeVI/klvgc
 
 go 1.25.0
