@@ -16,6 +16,7 @@ func NewSet[T comparable](vals ...T) *Set[T] {
 	return &newset
 }
 
+// Contains returns true if the set contains the value
 func (s *Set[T]) Contains(val T) bool {
 	for _, v := range s.List {
 		if v == val {
