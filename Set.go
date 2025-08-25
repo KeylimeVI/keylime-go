@@ -2,6 +2,7 @@ package klvgc
 
 import "fmt"
 
+// Set is an alias of List that provides useful methods and ease of use
 type Set[T comparable] struct {
 	List[T]
 }
