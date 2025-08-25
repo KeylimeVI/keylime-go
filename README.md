@@ -1,1 +1,1 @@
-Keylime's Go Collections (klvgc) adds simple and useful collections for Go like List and Set
+kv is a general go utility library with some convinient structs and functions
