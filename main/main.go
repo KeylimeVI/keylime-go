@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	. "kv"
+	. "github.com/KeylimeVI/kv"
 )
 
 func main() {
