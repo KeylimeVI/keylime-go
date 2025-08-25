@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	. "kvlist"
+	. "kv"
 )
 
 func main() {

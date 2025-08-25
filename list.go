@@ -1,4 +1,4 @@
-package klvgc
+package kv
 
 import (
 	"errors"
