@@ -7,6 +7,7 @@ type Set[T comparable] struct {
 	List[T]
 }
 
+// NewSet creates a new set from the given values
 func NewSet[T comparable](vals ...T) *Set[T] {
 	newset := Set[T]{}
 	for _, v := range vals {
