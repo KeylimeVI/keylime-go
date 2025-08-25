@@ -36,6 +36,7 @@ func (s *Set[T]) Append(vals ...T) *Set[T] {
 	return s
 }
 
+// Extend is an alias for Append
 func (s *Set[T]) Extend(vals []T) *Set[T] {
 	return s.Append(vals...)
 }
