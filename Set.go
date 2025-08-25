@@ -26,6 +26,7 @@ func (s *Set[T]) Contains(val T) bool {
 	return false
 }
 
+// Append adds the given values to the set, if they are not already present
 func (s *Set[T]) Append(vals ...T) *Set[T] {
 	for _, v := range vals {
 		if !s.Contains(v) {
