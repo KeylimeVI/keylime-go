@@ -11,7 +11,6 @@ func main() {
 	testNewSet()
 	testSetContains()
 	testSetAppend()
-	testSetExtend()
 	testSetInsert()
 	testSetSet()
 	testSetUniqueness()
@@ -81,31 +80,6 @@ func testSetAppend() {
 		panic("Method chaining should work")
 	}
 	fmt.Println("✓ Append works correctly")
-}
-
-func testSetExtend() {
-	fmt.Println("Testing Extend...")
-
-	set := NewSet(1, 2, 3)
-	newValues := []int{3, 4, 5} // 3 is duplicate
-
-	// Extend with slice
-	set.Extend(newValues)
-	if set.Len() != 5 || !set.Contains(4) || !set.Contains(5) {
-		panic("Extend should add unique values from slice")
-	}
-
-	// Test that duplicates weren't added
-	count := 0
-	for _, v := range set.List {
-		if v == 3 {
-			count++
-		}
-	}
-	if count != 1 {
-		panic("Extend should not add duplicates")
-	}
-	fmt.Println("✓ Extend works correctly")
 }
 
 func testSetInsert() {

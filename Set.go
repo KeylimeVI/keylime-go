@@ -36,11 +36,6 @@ func (s *Set[T]) Append(vals ...T) *Set[T] {
 	return s
 }
 
-// Extend is an alias for Append
-func (s *Set[T]) Extend(vals []T) *Set[T] {
-	return s.Append(vals...)
-}
-
 func (s *Set[T]) Insert(index int, vals ...T) error {
 	if !s.ValidIndexLoose(index) {
 		return fmt.Errorf("index %d out of bounds", index)

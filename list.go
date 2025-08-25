@@ -75,12 +75,6 @@ func (l *List[T]) ValidIndexLoose(index int) bool {
 	return index >= 0 && index <= l.Len()
 }
 
-// Extend the list with the values in vals
-func (l *List[T]) Extend(vals List[T]) *List[T] {
-	*l = append(*l, vals...)
-	return l
-}
-
 // Clear the list
 func (l *List[T]) Clear() *List[T] {
 	*l = []T{}
