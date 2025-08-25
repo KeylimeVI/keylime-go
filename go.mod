@@ -1,3 +1,3 @@
-module kvlist
+module klvgc
 
 go 1.24
