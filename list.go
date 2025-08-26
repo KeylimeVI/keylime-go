@@ -9,11 +9,6 @@ import (
 // List is an alias of Slice that provides useful methods and ease of use
 type List[T any] []T
 
-func NewList[T any](vals ...T) *List[T] {
-	list := List[T](vals)
-	return &list
-}
-
 // Append vals to the end of the list
 func (l *List[T]) Append(vals ...T) *List[T] {
 	*l = append(*l, vals...)
@@ -25,14 +20,12 @@ func (l *List[T]) Len() int {
 	return len(*l)
 }
 
-// Contains returns true if the list contains the value
-func Contains[T comparable](list []T, value T) bool {
-	for _, item := range list {
-		if item == value { // ✅ This now works
-			return true
-		}
-	}
-	return false
+func (l *List[T]) Capacity() int {
+	return cap(*l)
+}
+
+func (l *List[T]) String() string {
+	return fmt.Sprintf("%v", *l)
 }
 
 // Get the item at index i, or false if the index is out of bounds
@@ -174,13 +167,76 @@ func (l *List[T]) Copy() List[T] {
 	return c
 }
 
-// Index returns a new list containing the elements from start (inclusive) to end (exclusive)
-func (l *List[T]) Index(start int, end int) (List[T], error) {
-	if !l.ValidIndex(start) || !l.ValidIndex(end) {
+// Slice returns a new list containing the elements from start (inclusive) to end (exclusive)
+func (l *List[T]) Slice(start int, end int) (List[T], error) {
+	if !l.ValidIndex(start) || !l.ValidIndexLoose(end) {
 		return nil, errors.New("invalid index")
 	}
 	if end < start {
 		return nil, errors.New("end index must be greater than start index")
 	}
 	return (*l)[start:end], nil
+}
+
+func (l *List[T]) Filter(f func(T) bool) List[T] {
+	result := *NewList[T]()
+	for _, item := range *l {
+		if f(item) {
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
+func (l *List[T]) ThereExists(f func(T) bool) bool {
+	for _, item := range *l {
+		if f(item) {
+			return true
+		}
+	}
+	return false
+}
+
+func (l *List[T]) ForAll(f func(T) bool) bool {
+	for _, item := range *l {
+		if !f(item) {
+			return false
+		}
+	}
+	return true
+}
+
+// Find returns the first item for which f returns true, or (T, false) if none match
+func (l *List[T]) Find(f func(T) bool) (T, bool) {
+	for _, item := range *l {
+		if f(item) {
+			return item, true
+		}
+	}
+	var zero T
+	return zero, false
+}
+
+func (l *List[T]) ForEach(f func(T)) *List[T] {
+	for _, item := range *l {
+		f(item)
+	}
+	return l
+}
+
+func (l *List[T]) Chunk(size int) List[List[T]] {
+	if size <= 0 {
+		// Return the whole list as one chunk if size is invalid
+		return List[List[T]]{*l}
+	}
+
+	var chunks List[List[T]]
+	for i := 0; i < len(*l); i += size {
+		end := i + size
+		if end > len(*l) {
+			end = len(*l)
+		}
+		chunks = append(chunks, (*l)[i:end])
+	}
+	return chunks
 }
