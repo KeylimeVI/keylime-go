@@ -9,6 +9,17 @@ import (
 // List is an alias of Slice that provides useful methods and ease of use
 type List[T any] []T
 
+func NewList[T any](vals ...T) *List[T] {
+	list := List[T](vals)
+	return &list
+}
+
+func NewListWithCapacity[T any](capacity int, vals ...T) *List[T] {
+	list := make(List[T], 0, capacity)
+	list = append(list, vals...)
+	return &list
+}
+
 // Append vals to the end of the list
 func (l *List[T]) Append(vals ...T) *List[T] {
 	*l = append(*l, vals...)
@@ -29,16 +40,16 @@ func (l *List[T]) String() string {
 }
 
 // Get the item at index i, or false if the index is out of bounds
-func (l *List[T]) Get(i int) (T, bool) {
+func (l *List[T]) Get(i int) (T, error) {
 	if l.IsEmpty() {
 		var zero T
-		return zero, false
+		return zero, errors.New("list is empty")
 	}
 	if !l.ValidIndex(i) {
 		var zero T
-		return zero, false
+		return zero, errors.New("index out of range")
 	}
-	return (*l)[i], true
+	return (*l)[i], nil
 }
 
 // Remove the item at index i

@@ -1,6 +1,7 @@
 package kv
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"strings"
@@ -16,6 +17,12 @@ func NewSet[T comparable](vals ...T) *Set[T] {
 		newset.Append(v)
 	}
 	return &newset
+}
+
+func NewSetFromCapacity[T comparable](capacity int, vals ...T) *Set[T] {
+	set := make(Set[T], 0, capacity)
+	set = append(set, vals...)
+	return &set
 }
 
 // Contains returns true if the set contains the value
@@ -103,12 +110,12 @@ func (s *Set[T]) Capacity() int {
 	return cap(*s)
 }
 
-func (s *Set[T]) Get(i int) T {
+func (s *Set[T]) Get(i int) (T, error) {
 	if !s.ValidIndex(i) {
 		var zero T
-		return zero
+		return zero, errors.New("index out of range")
 	}
-	return (*s)[i]
+	return (*s)[i], nil
 }
 
 func (s *Set[T]) Remove(i int) error {

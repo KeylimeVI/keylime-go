@@ -1,10 +1,5 @@
 package kv
 
-func NewList[T any](vals ...T) *List[T] {
-	list := List[T](vals)
-	return &list
-}
-
 // Contains returns true if the list contains the value
 func Contains[T comparable](list []T, value T) bool {
 	for _, item := range list {
