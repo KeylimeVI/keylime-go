@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math/rand"
 	"strings"
-	"time"
 )
 
 // Set is an alias of []T that behaves like a mathematical set
@@ -80,20 +79,20 @@ func (s *Set[T]) SubsetOf(other Set[T]) bool {
 }
 
 func (s *Set[T]) Intersection(other Set[T]) Set[T] {
-	var intersection Set[T]
+	intersection := NewSet[T]()
 	for _, v := range *s {
 		if other.Contains(v) {
 			intersection.Append(v)
 		}
 	}
-	return intersection
+	return *intersection
 }
 
 func (s *Set[T]) Union(other Set[T]) Set[T] {
-	var union Set[T]
+	union := NewSet[T]()
 	union.Append(*s...)
 	union.Append(other...)
-	return union
+	return *union
 }
 
 func (s *Set[T]) Len() int {
@@ -165,10 +164,10 @@ func (s *Set[T]) Reverse() {
 }
 
 func (s *Set[T]) Shuffle() {
-	rand.Seed(time.Now().UnixNano())
-	rand.Shuffle(len(*s), func(i, j int) {
+	for i := range *s {
+		j := rand.Intn(i + 1)
 		(*s)[i], (*s)[j] = (*s)[j], (*s)[i]
-	})
+	}
 }
 
 func (s *Set[T]) Clear() {
@@ -262,7 +261,7 @@ func (s *Set[T]) Chunk(size int) List[Set[T]] {
 			end = len(setSlice)
 		}
 
-		chunkSet := Set[T](setSlice[i:end])
+		chunkSet := setSlice[i:end]
 		chunks = append(chunks, chunkSet)
 	}
 	return chunks
