@@ -79,6 +79,23 @@ func (s *Set[T]) SubsetOf(other Set[T]) bool {
 	return false
 }
 
+func (s *Set[T]) Intersection(other Set[T]) Set[T] {
+	var intersection Set[T]
+	for _, v := range *s {
+		if other.Contains(v) {
+			intersection.Append(v)
+		}
+	}
+	return intersection
+}
+
+func (s *Set[T]) Union(other Set[T]) Set[T] {
+	var union Set[T]
+	union.Append(*s...)
+	union.Append(other...)
+	return union
+}
+
 func (s *Set[T]) Len() int {
 	return len(*s)
 }
