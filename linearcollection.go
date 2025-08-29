@@ -1,4 +1,4 @@
-package kv
+package kl
 
 type LinearCollection[T any] interface {
 	Append(...T)

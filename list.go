@@ -1,4 +1,4 @@
-package kv
+package kl
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 	"math/rand"
 )
 
-// List is an alias of Slice that provides useful methods and ease of use
+// List is a generic type definition of Slice that provides useful methods and ease of use
 type List[T any] []T
 
 func NewList[T any](vals ...T) *List[T] {
@@ -235,19 +235,23 @@ func (l *List[T]) ForEach(f func(T)) *List[T] {
 	return l
 }
 
-func (l *List[T]) Chunk(size int) List[List[T]] {
+func (l *List[T]) Chunk(size int) []*List[T] {
 	if size <= 0 {
-		// Return the whole list as one chunk if size is invalid
-		return List[List[T]]{*l}
+		// Return the whole list as one chunk
+		return []*List[T]{l}
 	}
 
-	var chunks List[List[T]]
+	var chunks []*List[T]
 	for i := 0; i < len(*l); i += size {
 		end := i + size
 		if end > len(*l) {
 			end = len(*l)
 		}
-		chunks = append(chunks, (*l)[i:end])
+
+		// Create a new chunk list
+		chunk := &List[T]{}
+		*chunk = append(*chunk, (*l)[i:end]...)
+		chunks = append(chunks, chunk)
 	}
 	return chunks
 }

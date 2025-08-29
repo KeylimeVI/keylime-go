@@ -1,4 +1,4 @@
-module github.com/KeylimeVI/kv
+module github.com/KeylimeVI/kl
 
 go 1.25.0
 
