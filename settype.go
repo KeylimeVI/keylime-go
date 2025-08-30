@@ -221,16 +221,6 @@ func (s *Set[T]) Pop() (T, error) {
 	return value, nil
 }
 
-func (s *Set[T]) Dequeue() (T, error) {
-	if s.IsEmpty() {
-		var zero T
-		return zero, fmt.Errorf("cannot dequeue from empty set")
-	}
-	value := (*s)[0]
-	*s = (*s)[1:]
-	return value, nil
-}
-
 func (s *Set[T]) Swap(i int, j int) error {
 	if !s.ValidIndex(i) || !s.ValidIndex(j) {
 		return fmt.Errorf("invalid indices for swap: %d, %d", i, j)
@@ -282,4 +272,8 @@ func (s *Set[T]) ToSlice() []T {
 	slice := make([]T, len(*s))
 	copy(slice, *s)
 	return slice
+}
+
+func (s *Set[T]) ToList() List[T] {
+	return NewList[T](*s...)
 }
