@@ -14,4 +14,11 @@ func main() {
 	fmt.Println(list)
 	Sort[List[int], int](&list)
 	fmt.Println(list)
+	list.Remove(2)
+	fmt.Println(list)
+	list.RemoveAny(-4, 6, 12)
+	fmt.Println(list)
+	ok := list.RemoveAll(1, 2, 3)
+	fmt.Println(ok)
+	fmt.Println(list)
 }
