@@ -1,13 +1,13 @@
 package kl
 
 import (
-	"golang.org/x/exp/constraints"
+	"cmp"
 	"math/rand"
 )
 
-// Sort sorts the list in-place using the quicksort algorithm
-func Sort[T constraints.Ordered](list *[]T) {
-	if len(*list) <= 1 {
+// Sort sorts any slice-like type in-place using the quicksort algorithm
+func Sort[S ~[]T, T cmp.Ordered](list *S) {
+	if list == nil || len(*list) <= 1 {
 		return
 	}
 	if IsSorted(list) {
@@ -17,17 +17,16 @@ func Sort[T constraints.Ordered](list *[]T) {
 }
 
 // quicksort is the recursive implementation of the quicksort algorithm
-func quicksort[T constraints.Ordered](arr *[]T, low, high int) {
+func quicksort[S ~[]T, T cmp.Ordered](arr *S, low, high int) {
 	if low < high {
 		pivotIndex := partition(arr, low, high)
-
-		quicksort[T](arr, low, pivotIndex-1)
-		quicksort[T](arr, pivotIndex+1, high)
+		quicksort[S, T](arr, low, pivotIndex-1)
+		quicksort[S, T](arr, pivotIndex+1, high)
 	}
 }
 
 // partition rearranges the array and returns the pivot index
-func partition[T constraints.Ordered](arr *[]T, low, high int) int {
+func partition[S ~[]T, T cmp.Ordered](arr *S, low, high int) int {
 	pivotIndex := low + rand.Intn(high-low+1)
 	pivot := (*arr)[pivotIndex]
 
@@ -47,7 +46,10 @@ func partition[T constraints.Ordered](arr *[]T, low, high int) int {
 }
 
 // IsSorted returns true if the list is sorted
-func IsSorted[T constraints.Ordered](list *[]T) bool {
+func IsSorted[S ~[]T, T cmp.Ordered](list *S) bool {
+	if list == nil || len(*list) <= 1 {
+		return true
+	}
 	for i := 1; i < len(*list); i++ {
 		if (*list)[i] < (*list)[i-1] {
 			return false

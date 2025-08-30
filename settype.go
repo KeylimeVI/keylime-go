@@ -11,18 +11,18 @@ import (
 type Set[T comparable] []T
 
 // NewSet creates a new set from the given values
-func NewSet[T comparable](vals ...T) *Set[T] {
-	newset := Set[T]{}
+func NewSet[T comparable](vals ...T) Set[T] {
+	newSet := make(Set[T], 0, len(vals))
 	for _, v := range vals {
-		newset.Append(v)
+		newSet.Append(v)
 	}
-	return &newset
+	return newSet
 }
 
-func NewSetFromCapacity[T comparable](capacity int, vals ...T) *Set[T] {
+func NewSetFromCapacity[T comparable](capacity int, vals ...T) Set[T] {
 	set := make(Set[T], 0, capacity)
 	set = append(set, vals...)
-	return &set
+	return set
 }
 
 // Contains returns true if the set contains the value
@@ -35,7 +35,7 @@ func (s *Set[T]) Contains(val T) bool {
 	return false
 }
 
-// Append adds the given values to the set, if they are not already present
+// Append adds the given values to the set if they are not already present
 func (s *Set[T]) Append(vals ...T) *Set[T] {
 	for _, v := range vals {
 		if !s.Contains(v) {
@@ -43,6 +43,10 @@ func (s *Set[T]) Append(vals ...T) *Set[T] {
 		}
 	}
 	return s
+}
+
+func (s *Set[T]) Extend(vals []T) *Set[T] {
+	return s.Append(vals...)
 }
 
 func (s *Set[T]) Insert(index int, vals ...T) error {
@@ -92,14 +96,14 @@ func (s *Set[T]) Intersection(other Set[T]) Set[T] {
 			intersection.Append(v)
 		}
 	}
-	return *intersection
+	return intersection
 }
 
 func (s *Set[T]) Union(other Set[T]) Set[T] {
 	union := NewSet[T]()
 	union.Append(*s...)
 	union.Append(other...)
-	return *union
+	return union
 }
 
 func (s *Set[T]) Len() int {
@@ -272,4 +276,10 @@ func (s *Set[T]) Chunk(size int) List[Set[T]] {
 		chunks = append(chunks, chunkSet)
 	}
 	return chunks
+}
+
+func (s *Set[T]) ToSlice() []T {
+	slice := make([]T, len(*s))
+	copy(slice, *s)
+	return slice
 }
