@@ -1,1 +1,1 @@
-kv is a general go utility library that adds convinient structs and functions
+kl is a general go utility library that adds convinient structs and functions
