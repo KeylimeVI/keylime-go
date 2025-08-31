@@ -25,7 +25,7 @@ func Reduce[T any, U any](list []T, initial U, f func(accumulator U, value T) U)
 
 // Sort sorts any slice-like type in-place using the quicksort algorithm
 func Sort[S ~[]T, T cmp.Ordered](list *S) {
-	if list == nil || len(*list) <= 1 {
+	if list == nil {
 		return
 	}
 	if IsSorted(list) {
@@ -40,4 +40,20 @@ func IsSorted[S ~[]T, T cmp.Ordered](list *S) bool {
 		return true
 	}
 	return slices.IsSorted[S, T](*list)
+}
+
+func Min[T cmp.Ordered](list []T) T {
+	return slices.Min(list)
+}
+
+func Max[T cmp.Ordered](list []T) T {
+	return slices.Max(list)
+}
+
+func Sum[T cmp.Ordered](list []T) T {
+	var s T
+	for _, item := range list {
+		s += item
+	}
+	return s
 }
