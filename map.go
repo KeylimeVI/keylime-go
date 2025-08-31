@@ -36,7 +36,7 @@ func (m *Map[K, V]) Delete(key K) {
 	delete(*m, key)
 }
 
-func (m *Map[K, V]) Has(key K) bool {
+func (m *Map[K, V]) Contains(key K) bool {
 	_, exists := (*m)[key]
 	return exists
 }
