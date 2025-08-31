@@ -11,7 +11,7 @@ type RealNumber interface {
 		~float32 | ~float64
 }
 
-const NOT_FOUND = -1
+const NotFound = -1
 
 // Contains returns true if the list contains the value
 func Contains[T comparable](list []T, value T) bool {
@@ -84,12 +84,12 @@ func Find[T comparable](slice []T, value T) int {
 			return i
 		}
 	}
-	return NOT_FOUND
+	return NotFound
 }
 
 func BinarySearch[T cmp.Ordered](slice []T, value T) int {
 	if len(slice) == 0 {
-		return NOT_FOUND
+		return NotFound
 	}
 	if !IsSorted(slice) {
 		sortedSlice := NewList[T](slice...)
@@ -98,13 +98,13 @@ func BinarySearch[T cmp.Ordered](slice []T, value T) int {
 		if ok {
 			return i
 		}
-		return NOT_FOUND
+		return NotFound
 	}
 	i, ok := slices.BinarySearch(slice, value)
 	if ok {
 		return i
 	}
-	return NOT_FOUND
+	return NotFound
 }
 
 func Median[T cmp.Ordered](list []T) T {
