@@ -36,3 +36,15 @@ func (s *Stack[T]) Len() int {
 func (s *Stack[T]) Clear() {
 	s.list.Clear()
 }
+
+func (s *Stack[T]) Copy() *Stack[T] {
+	return &Stack[T]{list: s.list.Copy()}
+}
+
+func (s *Stack[T]) ToList() List[T] {
+	return s.list.Copy()
+}
+
+func (s *Stack[T]) ToSlice() []T {
+	return s.list.ToSlice()
+}

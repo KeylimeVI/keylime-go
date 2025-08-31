@@ -8,8 +8,9 @@ func NewQueue[T any]() Queue[T] {
 	return Queue[T]{list: NewList[T]()}
 }
 
-func (q *Queue[T]) Enqueue(items ...T) {
+func (q *Queue[T]) Enqueue(items ...T) *Queue[T] {
 	q.list.Append(items...)
+	return q
 }
 
 func (q *Queue[T]) Dequeue() (T, bool) {
@@ -31,4 +32,16 @@ func (q *Queue[T]) Len() int {
 
 func (q *Queue[T]) Clear() {
 	q.list.Clear()
+}
+
+func (q *Queue[T]) Copy() *Queue[T] {
+	return &Queue[T]{list: q.list.Copy()}
+}
+
+func (q *Queue[T]) ToList() List[T] {
+	return q.list.Copy()
+}
+
+func (q *Queue[T]) ToSlice() []T {
+	return q.list.ToSlice()
 }

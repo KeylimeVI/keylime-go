@@ -57,3 +57,7 @@ func Sum[T cmp.Ordered](list []T) T {
 	}
 	return s
 }
+
+func ListToSet[T comparable](list []T) Set[T] {
+	return NewSet[T](list...)
+}
