@@ -91,7 +91,7 @@ func (l *List[T]) RemoveAll(indices ...int) bool {
 			return false
 		}
 	}
-	Sort[Set[int], int](&indicesSet)
+	Sort[Set[int], int](indicesSet)
 	indicesSet.Reverse()
 	for _, index := range indicesSet {
 		l.Remove(index)
@@ -104,7 +104,7 @@ func (l *List[T]) RemoveAny(indices ...int) *List[T] {
 		return l
 	}
 	indicesSet := NewSet[int](indices...)
-	Sort[Set[int], int](&indicesSet)
+	Sort[Set[int], int](indicesSet)
 	indicesSet.Reverse()
 	for _, index := range indicesSet {
 		if l.ValidIndex(index) {

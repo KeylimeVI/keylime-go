@@ -20,7 +20,7 @@ func main() {
 
 	// Modify the map
 	m.Delete("banana")
-	fmt.Println("Contains banana:", m.Contains("banana")) // false
+	fmt.Println("Has banana:", m.Has("banana")) // false
 
 	// Merge with another map
 	other := NewMapFrom(map[string]int{"orange": 8, "grape": 12})

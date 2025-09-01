@@ -1,6 +1,6 @@
 package kl
 
-type Priority int
+type Priority = int
 
 const (
 	Critical Priority = iota
@@ -10,83 +10,119 @@ const (
 )
 
 type PriorityQueue[T any] struct {
-	queues     *Map[Priority, *Queue[T]] // Use the new Map type
-	priorities []Priority                // Ordered list of priorities
+	queues     *Map[Priority, *Queue[T]]
+	priorities Set[Priority]
 }
 
-func NewPriorityQueue[T any]() *PriorityQueue[T] {
-	pq := &PriorityQueue[T]{
-		queues:     NewMap[Priority, *Queue[T]](),
-		priorities: []Priority{Critical, High, Medium, Low}, // Highest priority first
+func NewPriorityQueue[T any]() PriorityQueue[T] {
+	pq := PriorityQueue[T]{
+		queues:     &Map[Priority, *Queue[T]]{},
+		priorities: Set[Priority]{Critical, High, Medium, Low}, // order matters
 	}
-
-	// Initialize queues for each priority level
-	for _, priority := range pq.priorities {
-		pq.queues.Set(priority, &NewQueue[T]())
+	// init queues for each priority
+	for _, p := range pq.priorities {
+		q := NewQueue[T]()
+		pq.queues.Set(p, &q)
 	}
-
 	return pq
 }
 
-func (pq *PriorityQueue[T]) Enqueue(item T, priority Priority) {
-	if queue, exists := pq.queues.Get(priority); exists {
-		queue.Enqueue(item)
-	} else {
-		// If unknown priority, use Normal as default
-		if normalQueue, exists := pq.queues.Get(Normal); exists {
-			normalQueue.Enqueue(item)
-		}
+func NewCustomPriorityQueue[T any](priorities Set[Priority]) PriorityQueue[T] {
+	pq := PriorityQueue[T]{
+		queues:     &Map[Priority, *Queue[T]]{},
+		priorities: priorities,
 	}
+	// init queues for each priority
+	for _, p := range pq.priorities {
+		q := NewQueue[T]()
+		pq.queues.Set(p, &q)
+	}
+	return pq
+}
+
+func (pq *PriorityQueue[T]) Enqueue(p Priority, items ...T) {
+	q, _ := pq.queues.Get(p)
+	q.Enqueue(items...)
 }
 
 func (pq *PriorityQueue[T]) Dequeue() (T, bool) {
-	// Check queues in priority order (highest first)
-	for _, priority := range pq.priorities {
-		if queue, exists := pq.queues.Get(priority); exists {
-			if item, ok := queue.Dequeue(); ok {
-				return item, true
-			}
+	for _, p := range pq.priorities {
+		q, _ := pq.queues.Get(p)
+		if !q.IsEmpty() {
+			return q.Dequeue()
 		}
 	}
-
 	var zero T
 	return zero, false
 }
 
 func (pq *PriorityQueue[T]) Peek() (T, bool) {
-	for _, priority := range pq.priorities {
-		if queue, exists := pq.queues.Get(priority); exists {
-			if item, ok := queue.Peek(); ok {
-				return item, true
-			}
+	for _, p := range pq.priorities {
+		q, _ := pq.queues.Get(p)
+		if !q.IsEmpty() {
+			return q.Peek()
 		}
 	}
-
 	var zero T
 	return zero, false
 }
 
-func (pq *PriorityQueue[T]) Len() int {
-	total := 0
-	pq.queues.ForEach(func(_ Priority, queue *Queue[T]) {
-		total += queue.Len()
-	})
-	return total
-}
-
 func (pq *PriorityQueue[T]) IsEmpty() bool {
-	return pq.Len() == 0
-}
-
-func (pq *PriorityQueue[T]) PriorityLen(priority Priority) int {
-	if queue, exists := pq.queues.Get(priority); exists {
-		return queue.Len()
+	for _, p := range pq.priorities {
+		q, _ := pq.queues.Get(p)
+		if !q.IsEmpty() {
+			return false
+		}
 	}
-	return 0
+	return true
 }
 
+func (pq *PriorityQueue[T]) Len() int {
+	count := 0
+	for _, p := range pq.priorities {
+		q, _ := pq.queues.Get(p)
+		count += q.Len()
+	}
+	return count
+}
+
+// Clear removes all elements from all queues.
 func (pq *PriorityQueue[T]) Clear() {
-	pq.queues.ForEach(func(_ Priority, queue *Queue[T]) {
-		queue.Clear()
-	})
+	for _, p := range pq.priorities {
+		q, _ := pq.queues.Get(p)
+		q.Clear()
+	}
+}
+
+// Copy returns a deep copy of the PriorityQueue.
+func (pq *PriorityQueue[T]) Copy() *PriorityQueue[T] {
+	newPQ := &PriorityQueue[T]{
+		queues:     &Map[Priority, *Queue[T]]{},
+		priorities: append(Set[Priority]{}, pq.priorities...), // copy priorities list
+	}
+	for _, p := range pq.priorities {
+		q, _ := pq.queues.Get(p)
+		newPQ.queues.Set(p, q.Copy())
+	}
+	return newPQ
+}
+
+// ToList returns all elements from all priorities as a List, ordered by priority.
+func (pq *PriorityQueue[T]) ToList() List[T] {
+	result := NewList[T]()
+	for _, p := range pq.priorities {
+		q, _ := pq.queues.Get(p)
+		result.Append(q.ToList()...)
+	}
+	return result
+}
+
+// ToSlice returns all elements from all priorities as a slice, ordered by priority.
+func (pq *PriorityQueue[T]) ToSlice() []T {
+	result := NewList[T]()
+	for _, p := range pq.priorities {
+		q, _ := pq.queues.Get(p)
+		result.Append(q.ToList()...)
+	}
+	return result.ToSlice()
 }
