@@ -8,26 +8,23 @@ import (
 )
 
 // Set is an alias of []T that behaves like a mathematical set
-type Set[T comparable] []T
+type Set[T comparable] struct {
+	list List[T]
+}
 
 // NewSet creates a new set from the given values
 func NewSet[T comparable](vals ...T) Set[T] {
-	newSet := make(Set[T], 0, len(vals))
+	newList := NewListWithCapacity[T](len(vals))
 	for _, v := range vals {
-		newSet.Append(v)
+		newList.Append(v)
 	}
+	newSet := Set[T]{newList}
 	return newSet
-}
-
-func NewSetFromCapacity[T comparable](capacity int, vals ...T) Set[T] {
-	set := make(Set[T], 0, capacity)
-	set = append(set, vals...)
-	return set
 }
 
 // Contains returns true if the set contains the value
 func (s *Set[T]) Contains(val T) bool {
-	for _, v := range *s {
+	for _, v := range s.list {
 		if v == val {
 			return true
 		}
@@ -39,7 +36,7 @@ func (s *Set[T]) Contains(val T) bool {
 func (s *Set[T]) Append(vals ...T) *Set[T] {
 	for _, v := range vals {
 		if !s.Contains(v) {
-			*s = append(*s, v)
+			s.list.Append(v)
 		}
 	}
 	return s
@@ -57,9 +54,9 @@ func (s *Set[T]) Insert(index int, vals ...T) error {
 		s.Append(vals...)
 		return nil
 	}
-	prev := (*s)[:index]
-	after := (*s)[index:]
-	*s = append(prev, vals...)
+	prev := (s.list)[:index]
+	after := (s.list)[index:]
+	s.list = append(prev, vals...)
 	s.Append(after...)
 	return nil
 }
@@ -71,7 +68,7 @@ func (s *Set[T]) Set(index int, val T) error {
 	if !s.ValidIndex(index) {
 		return fmt.Errorf("index %d out of bounds", index)
 	}
-	(*s)[index] = val
+	(s.list)[index] = val
 	return nil
 }
 
@@ -91,7 +88,7 @@ func (s *Set[T]) SubsetOf(other Set[T]) bool {
 
 func (s *Set[T]) Intersection(other Set[T]) Set[T] {
 	intersection := NewSet[T]()
-	for _, v := range *s {
+	for _, v := range s.list {
 		if other.Contains(v) {
 			intersection.Append(v)
 		}
@@ -101,17 +98,17 @@ func (s *Set[T]) Intersection(other Set[T]) Set[T] {
 
 func (s *Set[T]) Union(other Set[T]) Set[T] {
 	union := NewSet[T]()
-	union.Append(*s...)
-	union.Append(other...)
+	union.Append(s.list...)
+	union.Append(other.list...)
 	return union
 }
 
 func (s *Set[T]) Len() int {
-	return len(*s)
+	return len(s.list)
 }
 
 func (s *Set[T]) Capacity() int {
-	return cap(*s)
+	return cap(s.list)
 }
 
 func (s *Set[T]) Get(i int) (T, error) {
@@ -119,7 +116,7 @@ func (s *Set[T]) Get(i int) (T, error) {
 		var zero T
 		return zero, errors.New("index out of range")
 	}
-	return (*s)[i], nil
+	return (s.list)[i], nil
 }
 
 func (s *Set[T]) Remove(i int) error {
@@ -127,24 +124,24 @@ func (s *Set[T]) Remove(i int) error {
 		return fmt.Errorf("index %d out of bounds", i)
 	}
 	// Remove the element by creating a new slice without it
-	*s = append((*s)[:i], (*s)[i+1:]...)
+	s.list = append((s.list)[:i], (s.list)[i+1:]...)
 	return nil
 }
 
 func (s *Set[T]) ForEach(f func(T)) {
-	for _, item := range *s {
+	for _, item := range s.list {
 		f(item)
 	}
 }
 
-func (s *Set[T]) Copy() *Set[T] {
-	newSet := make(Set[T], len(*s))
-	copy(newSet, *s)
-	return &newSet
+func (s *Set[T]) Copy() Set[T] {
+	newSet := NewSet[T](s.list...)
+	copy(newSet.list, s.list)
+	return newSet
 }
 
 func (s *Set[T]) ThereExists(f func(T) bool) bool {
-	for _, item := range *s {
+	for _, item := range s.list {
 		if f(item) {
 			return true
 		}
@@ -153,7 +150,7 @@ func (s *Set[T]) ThereExists(f func(T) bool) bool {
 }
 
 func (s *Set[T]) ForAll(f func(T) bool) bool {
-	for _, item := range *s {
+	for _, item := range s.list {
 		if !f(item) {
 			return false
 		}
@@ -163,32 +160,35 @@ func (s *Set[T]) ForAll(f func(T) bool) bool {
 
 func (s *Set[T]) Slice(start int, end int) (Set[T], error) {
 	if !s.ValidIndex(start) || end < start || end > s.Len() {
-		return nil, fmt.Errorf("invalid slice range [%d:%d]", start, end)
+		var zero Set[T]
+		return zero, fmt.Errorf("invalid slice range [%d:%d]", start, end)
 	}
-	return (*s)[start:end], nil
+	newSet := NewSet[T]()
+	newSet.list = (s.list)[start:end]
+	return newSet, nil
 }
 
 func (s *Set[T]) Reverse() {
-	for i, j := 0, len(*s)-1; i < j; i, j = i+1, j-1 {
-		(*s)[i], (*s)[j] = (*s)[j], (*s)[i]
+	for i, j := 0, len(s.list)-1; i < j; i, j = i+1, j-1 {
+		(s.list)[i], (s.list)[j] = (s.list)[j], (s.list)[i]
 	}
 }
 
 func (s *Set[T]) Shuffle() {
-	for i := range *s {
+	for i := range s.list {
 		j := rand.Intn(i + 1)
-		(*s)[i], (*s)[j] = (*s)[j], (*s)[i]
+		(s.list)[i], (s.list)[j] = (s.list)[j], (s.list)[i]
 	}
 }
 
 func (s *Set[T]) Clear() {
-	*s = (*s)[:0]
+	s.list = (s.list)[:0]
 }
 
 func (s *Set[T]) String() string {
 	var sb strings.Builder
 	sb.WriteString("Set[")
-	for i, item := range *s {
+	for i, item := range s.list {
 		if i > 0 {
 			sb.WriteString(", ")
 		}
@@ -199,15 +199,15 @@ func (s *Set[T]) String() string {
 }
 
 func (s *Set[T]) IsEmpty() bool {
-	return len(*s) == 0
+	return len(s.list) == 0
 }
 
 func (s *Set[T]) ValidIndex(i int) bool {
-	return i >= 0 && i < len(*s)
+	return i >= 0 && i < len(s.list)
 }
 
 func (s *Set[T]) ValidIndexLoose(i int) bool {
-	return i >= 0 && i <= len(*s)
+	return i >= 0 && i <= len(s.list)
 }
 
 func (s *Set[T]) Pop() (T, error) {
@@ -215,9 +215,9 @@ func (s *Set[T]) Pop() (T, error) {
 		var zero T
 		return zero, fmt.Errorf("cannot pop from empty set")
 	}
-	lastIndex := len(*s) - 1
-	value := (*s)[lastIndex]
-	*s = (*s)[:lastIndex]
+	lastIndex := len(s.list) - 1
+	value := (s.list)[lastIndex]
+	s.list = (s.list)[:lastIndex]
 	return value, nil
 }
 
@@ -225,55 +225,55 @@ func (s *Set[T]) Swap(i int, j int) error {
 	if !s.ValidIndex(i) || !s.ValidIndex(j) {
 		return fmt.Errorf("invalid indices for swap: %d, %d", i, j)
 	}
-	(*s)[i], (*s)[j] = (*s)[j], (*s)[i]
+	(s.list)[i], (s.list)[j] = (s.list)[j], (s.list)[i]
 	return nil
 }
 
-func (s *Set[T]) Filter(f func(T) bool) {
+func (s *Set[T]) Filter(f func(T) bool) Set[T] {
 	newSet := Set[T]{}
-	for _, item := range *s {
+	for _, item := range s.list {
 		if f(item) {
-			newSet = append(newSet, item)
+			newSet.Append(item)
 		}
 	}
-	*s = newSet
+	return newSet
 }
 
-func (s *Set[T]) Find(f func(T) bool) (int, bool) {
-	for i, item := range *s {
+func (s *Set[T]) Find(f func(T) bool) int {
+	for i, item := range s.list {
 		if f(item) {
-			return i, true
+			return i
 		}
 	}
-	return -1, false
+	return -1
 }
 
 func (s *Set[T]) Chunk(size int) List[Set[T]] {
-	if size <= 0 {
-		return List[Set[T]]{*s}
+	chunkOfLists := s.list.Chunk(size)
+	chunkOfSets := NewList[Set[T]]()
+	for _, list := range chunkOfLists {
+		chunkOfSets.Append(NewSet[T](list...))
 	}
-
-	var chunks List[Set[T]]
-	setSlice := *s
-
-	for i := 0; i < len(setSlice); i += size {
-		end := i + size
-		if end > len(setSlice) {
-			end = len(setSlice)
-		}
-
-		chunkSet := setSlice[i:end]
-		chunks = append(chunks, chunkSet)
-	}
-	return chunks
+	return chunkOfSets
 }
 
 func (s *Set[T]) ToSlice() []T {
-	slice := make([]T, len(*s))
-	copy(slice, *s)
+	slice := make([]T, len(s.list))
+	copy(slice, s.list)
 	return slice
 }
 
 func (s *Set[T]) ToList() List[T] {
-	return NewList[T](*s...)
+	return NewList[T](s.list...)
+}
+
+func (s *Set[T]) Iter() <-chan T {
+	ch := make(chan T)
+	go func() {
+		defer close(ch)
+		for _, item := range s.list {
+			ch <- item
+		}
+	}()
+	return ch
 }
