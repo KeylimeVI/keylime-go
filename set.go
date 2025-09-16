@@ -1,279 +1,147 @@
 package kl
 
-import (
-	"errors"
-	"fmt"
-	"math/rand"
-	"strings"
-)
+import "fmt"
 
-// Set is an alias of []T that behaves like a mathematical set
-type Set[T comparable] []T
+type Set[T comparable] map[T]struct{}
 
-// NewSet creates a new set from the given values
-func NewSet[T comparable](vals ...T) Set[T] {
-	newSet := make(Set[T], 0, len(vals))
-	for _, v := range vals {
-		newSet.Append(v)
-	}
-	return newSet
-}
-
-func NewSetFromCapacity[T comparable](capacity int, vals ...T) Set[T] {
-	set := make(Set[T], 0, capacity)
-	set = append(set, vals...)
-	return set
-}
-
-// Contains returns true if the set contains the value
-func (s *Set[T]) Contains(val T) bool {
-	for _, v := range *s {
-		if v == val {
-			return true
-		}
-	}
-	return false
-}
-
-// Append adds the given values to the set if they are not already present
-func (s *Set[T]) Append(vals ...T) *Set[T] {
-	for _, v := range vals {
-		if !s.Contains(v) {
-			*s = append(*s, v)
-		}
+// NewSet Constructor - returns Set value
+func NewSet[T comparable](items ...T) Set[T] {
+	s := make(Set[T])
+	for _, item := range items {
+		s[item] = struct{}{}
 	}
 	return s
 }
 
-func (s *Set[T]) Extend(vals []T) *Set[T] {
-	return s.Append(vals...)
+// IsEmpty Check if set is empty
+func (s *Set[T]) IsEmpty() bool {
+	return len(*s) == 0
 }
 
-func (s *Set[T]) Insert(index int, vals ...T) error {
-	if !s.ValidIndexLoose(index) {
-		return fmt.Errorf("index %d out of bounds", index)
-	}
-	if index == s.Len() {
-		s.Append(vals...)
-		return nil
-	}
-	prev := (*s)[:index]
-	after := (*s)[index:]
-	*s = append(prev, vals...)
-	s.Append(after...)
-	return nil
-}
-
-func (s *Set[T]) Set(index int, val T) error {
-	if s.Contains(val) {
-		return nil
-	}
-	if !s.ValidIndex(index) {
-		return fmt.Errorf("index %d out of bounds", index)
-	}
-	(*s)[index] = val
-	return nil
-}
-
-func (s *Set[T]) SupersetOf(other Set[T]) bool {
-	if other.ForAll(func(v T) bool { return s.Contains(v) }) {
-		return true
-	}
-	return false
-}
-
-func (s *Set[T]) SubsetOf(other Set[T]) bool {
-	if s.ForAll(func(v T) bool { return other.Contains(v) }) {
-		return true
-	}
-	return false
-}
-
-func (s *Set[T]) Intersection(other Set[T]) Set[T] {
-	intersection := NewSet[T]()
-	for _, v := range *s {
-		if other.Contains(v) {
-			intersection.Append(v)
-		}
-	}
-	return intersection
-}
-
-func (s *Set[T]) Union(other Set[T]) Set[T] {
-	union := NewSet[T]()
-	union.Append(*s...)
-	union.Append(other...)
-	return union
-}
-
-func (s *Set[T]) Len() int {
-	return len(*s)
-}
-
-func (s *Set[T]) Capacity() int {
-	return cap(*s)
-}
-
-func (s *Set[T]) Get(i int) (T, error) {
-	if !s.ValidIndex(i) {
-		var zero T
-		return zero, errors.New("index out of range")
-	}
-	return (*s)[i], nil
-}
-
-func (s *Set[T]) Remove(i int) error {
-	if !s.ValidIndex(i) {
-		return fmt.Errorf("index %d out of bounds", i)
-	}
-	// Remove the element by creating a new slice without it
-	*s = append((*s)[:i], (*s)[i+1:]...)
-	return nil
-}
-
-func (s *Set[T]) ForEach(f func(T)) {
-	for _, item := range *s {
-		f(item)
+// Append items to set
+func (s *Set[T]) Append(items ...T) {
+	for _, item := range items {
+		(*s)[item] = struct{}{}
 	}
 }
 
-func (s *Set[T]) Copy() *Set[T] {
-	newSet := make(Set[T], len(*s))
-	copy(newSet, *s)
-	return &newSet
-}
-
-func (s *Set[T]) ThereExists(f func(T) bool) bool {
-	for _, item := range *s {
-		if f(item) {
-			return true
-		}
+// Remove items from set
+func (s *Set[T]) Remove(items ...T) {
+	for _, item := range items {
+		delete(*s, item)
 	}
-	return false
 }
 
-func (s *Set[T]) ForAll(f func(T) bool) bool {
-	for _, item := range *s {
-		if !f(item) {
+// Contains Check if set contains item
+func (s *Set[T]) Contains(item T) bool {
+	_, exists := (*s)[item]
+	return exists
+}
+
+// ContainsAll Check if set contains all items
+func (s *Set[T]) ContainsAll(items ...T) bool {
+	for _, item := range items {
+		if !s.Contains(item) {
 			return false
 		}
 	}
 	return true
 }
 
-func (s *Set[T]) Slice(start int, end int) (Set[T], error) {
-	if !s.ValidIndex(start) || end < start || end > s.Len() {
-		return nil, fmt.Errorf("invalid slice range [%d:%d]", start, end)
-	}
-	return (*s)[start:end], nil
+// Len Get size of set
+func (s *Set[T]) Len() int {
+	return len(*s)
 }
 
-func (s *Set[T]) Reverse() {
-	for i, j := 0, len(*s)-1; i < j; i, j = i+1, j-1 {
-		(*s)[i], (*s)[j] = (*s)[j], (*s)[i]
-	}
-}
-
-func (s *Set[T]) Shuffle() {
-	for i := range *s {
-		j := rand.Intn(i + 1)
-		(*s)[i], (*s)[j] = (*s)[j], (*s)[i]
-	}
-}
-
+// Clear all items from set
 func (s *Set[T]) Clear() {
-	*s = (*s)[:0]
-}
-
-func (s *Set[T]) String() string {
-	var sb strings.Builder
-	sb.WriteString("Set[")
-	for i, item := range *s {
-		if i > 0 {
-			sb.WriteString(", ")
-		}
-		sb.WriteString(fmt.Sprintf("%v", item))
+	for item := range *s {
+		delete(*s, item)
 	}
-	sb.WriteString("]")
-	return sb.String()
 }
 
-func (s *Set[T]) IsEmpty() bool {
-	return len(*s) == 0
-}
-
-func (s *Set[T]) ValidIndex(i int) bool {
-	return i >= 0 && i < len(*s)
-}
-
-func (s *Set[T]) ValidIndexLoose(i int) bool {
-	return i >= 0 && i <= len(*s)
-}
-
-func (s *Set[T]) Pop() (T, error) {
-	if s.IsEmpty() {
-		var zero T
-		return zero, fmt.Errorf("cannot pop from empty set")
-	}
-	lastIndex := len(*s) - 1
-	value := (*s)[lastIndex]
-	*s = (*s)[:lastIndex]
-	return value, nil
-}
-
-func (s *Set[T]) Swap(i int, j int) error {
-	if !s.ValidIndex(i) || !s.ValidIndex(j) {
-		return fmt.Errorf("invalid indices for swap: %d, %d", i, j)
-	}
-	(*s)[i], (*s)[j] = (*s)[j], (*s)[i]
-	return nil
-}
-
-func (s *Set[T]) Filter(f func(T) bool) {
-	newSet := Set[T]{}
-	for _, item := range *s {
-		if f(item) {
-			newSet = append(newSet, item)
-		}
-	}
-	*s = newSet
-}
-
-func (s *Set[T]) Find(f func(T) bool) (int, bool) {
-	for i, item := range *s {
-		if f(item) {
-			return i, true
-		}
-	}
-	return -1, false
-}
-
-func (s *Set[T]) Chunk(size int) List[Set[T]] {
-	if size <= 0 {
-		return List[Set[T]]{*s}
-	}
-
-	var chunks List[Set[T]]
-	setSlice := *s
-
-	for i := 0; i < len(setSlice); i += size {
-		end := i + size
-		if end > len(setSlice) {
-			end = len(setSlice)
-		}
-
-		chunkSet := setSlice[i:end]
-		chunks = append(chunks, chunkSet)
-	}
-	return chunks
-}
-
+// ToSlice Convert to slice
 func (s *Set[T]) ToSlice() []T {
-	slice := make([]T, len(*s))
-	copy(slice, *s)
+	slice := make([]T, 0, len(*s))
+	for item := range *s {
+		slice = append(slice, item)
+	}
 	return slice
 }
 
 func (s *Set[T]) ToList() List[T] {
-	return NewList[T](*s...)
+	return NewList[T](s.ToSlice()...)
+}
+
+// SubsetOf Check if this set is a subset of another set
+func (s *Set[T]) SubsetOf(other *Set[T]) bool {
+	if s.IsEmpty() {
+		return true // Empty set is subset of any set
+	}
+
+	for item := range *s {
+		if !other.Contains(item) {
+			return false
+		}
+	}
+	return true
+}
+
+// SupersetOf Check if this set is a superset of another set
+func (s *Set[T]) SupersetOf(other *Set[T]) bool {
+	return other.SubsetOf(s)
+}
+
+// Union of two sets (returns Set value)
+func (s *Set[T]) Union(other *Set[T]) Set[T] {
+	result := NewSet[T]()
+	for item := range *s {
+		result[item] = struct{}{}
+	}
+	for item := range *other {
+		result[item] = struct{}{}
+	}
+	return result
+}
+
+// Intersection of two sets (returns Set value)
+func (s *Set[T]) Intersection(other *Set[T]) Set[T] {
+	result := NewSet[T]()
+	// Iterate over the smaller set for efficiency
+	if len(*s) < len(*other) {
+		for item := range *s {
+			if other.Contains(item) {
+				result[item] = struct{}{}
+			}
+		}
+	} else {
+		for item := range *other {
+			if s.Contains(item) {
+				result[item] = struct{}{}
+			}
+		}
+	}
+	return result
+}
+
+// Equals Check if two sets are equal
+func (s *Set[T]) Equals(other *Set[T]) bool {
+	if len(*s) != len(*other) {
+		return false
+	}
+	return s.SubsetOf(other)
+}
+
+// Clone the set (returns Set value)
+func (s *Set[T]) Clone() Set[T] {
+	result := NewSet[T]()
+	for item := range *s {
+		result[item] = struct{}{}
+	}
+	return result
+}
+
+// String representation (for debugging)
+func (s *Set[T]) String() string {
+	return fmt.Sprintf("%v", s.ToSlice())
 }

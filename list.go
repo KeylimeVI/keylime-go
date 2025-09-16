@@ -26,12 +26,6 @@ func (l *List[T]) Append(vals ...T) *List[T] {
 	return l
 }
 
-// Extend vals to the end of the list
-func (l *List[T]) Extend(vals []T) *List[T] {
-	*l = append(*l, vals...)
-	return l
-}
-
 // Len returns the length of the list
 func (l *List[T]) Len() int {
 	return len(*l)
@@ -86,14 +80,15 @@ func (l *List[T]) RemoveAll(indices ...int) bool {
 		return true
 	}
 	indicesSet := NewSet[int](indices...)
-	for _, index := range indicesSet {
+	for index := range indicesSet {
 		if !l.ValidIndex(index) {
 			return false
 		}
 	}
-	Sort[Set[int], int](indicesSet)
-	indicesSet.Reverse()
-	for _, index := range indicesSet {
+	indicesList := indicesSet.ToList()
+	Sort[List[int], int](indicesList)
+	indicesList.Reverse()
+	for _, index := range indicesList {
 		l.Remove(index)
 	}
 	return true
@@ -104,9 +99,10 @@ func (l *List[T]) RemoveAny(indices ...int) *List[T] {
 		return l
 	}
 	indicesSet := NewSet[int](indices...)
-	Sort[Set[int], int](indicesSet)
-	indicesSet.Reverse()
-	for _, index := range indicesSet {
+	indicesList := indicesSet.ToList()
+	Sort[List[int], int](indicesList)
+	indicesList.Reverse()
+	for _, index := range indicesList {
 		if l.ValidIndex(index) {
 			l.Remove(index)
 		}
