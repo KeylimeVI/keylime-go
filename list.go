@@ -26,12 +26,6 @@ func (l *List[T]) Append(vals ...T) *List[T] {
 	return l
 }
 
-// Extend vals to the end of the list
-func (l *List[T]) Extend(vals []T) *List[T] {
-	*l = append(*l, vals...)
-	return l
-}
-
 // Len returns the length of the list
 func (l *List[T]) Len() int {
 	return len(*l)
@@ -86,14 +80,14 @@ func (l *List[T]) RemoveAll(indices ...int) bool {
 		return true
 	}
 	indicesSet := NewSet[int](indices...)
-	for _, index := range indicesSet.ToSlice() {
+	for index := range indicesSet {
 		if !l.ValidIndex(index) {
 			return false
 		}
 	}
 	indicesList := indicesSet.ToList()
 	Sort[List[int], int](indicesList)
-	indicesSet.Reverse()
+	indicesList.Reverse()
 	for _, index := range indicesList {
 		l.Remove(index)
 	}
@@ -105,9 +99,10 @@ func (l *List[T]) RemoveAny(indices ...int) *List[T] {
 		return l
 	}
 	indicesSet := NewSet[int](indices...)
-	// Sort[Set[int], int](indicesSet)
-	indicesSet.Reverse()
-	for _, index := range indicesSet.ToSlice() {
+	indicesList := indicesSet.ToList()
+	Sort[List[int], int](indicesList)
+	indicesList.Reverse()
+	for _, index := range indicesList {
 		if l.ValidIndex(index) {
 			l.Remove(index)
 		}
@@ -280,13 +275,13 @@ func (l *List[T]) ForEach(f func(T)) *List[T] {
 	return l
 }
 
-func (l *List[T]) Chunk(size int) List[List[T]] {
+func (l *List[T]) Chunk(size int) []*List[T] {
 	if size <= 0 {
 		// Return the whole list as one chunk
-		return []List[T]{*l}
+		return []*List[T]{l}
 	}
 
-	var chunks []List[T]
+	var chunks []*List[T]
 	for i := 0; i < len(*l); i += size {
 		end := i + size
 		if end > len(*l) {
@@ -294,8 +289,8 @@ func (l *List[T]) Chunk(size int) List[List[T]] {
 		}
 
 		// Create a new chunk list
-		chunk := List[T]{}
-		chunk = append(chunk, (*l)[i:end]...)
+		chunk := &List[T]{}
+		*chunk = append(*chunk, (*l)[i:end]...)
 		chunks = append(chunks, chunk)
 	}
 	return chunks
