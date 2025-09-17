@@ -50,15 +50,15 @@ func IsSorted[S ~[]T, T cmp.Ordered](list S) bool {
 	return slices.IsSorted[S, T](list)
 }
 
-func Min[T cmp.Ordered](list []T) T {
+func Min[S ~[]T, T cmp.Ordered](list S) T {
 	return slices.Min(list)
 }
 
-func Max[T cmp.Ordered](list []T) T {
+func Max[S ~[]T, T cmp.Ordered](list S) T {
 	return slices.Max(list)
 }
 
-func Sum[T cmp.Ordered](list []T) T {
+func Sum[S ~[]T, T cmp.Ordered](list S) T {
 	var s T
 	for _, item := range list {
 		s += item
@@ -66,7 +66,7 @@ func Sum[T cmp.Ordered](list []T) T {
 	return s
 }
 
-func Average[T RealNumber](list []T) float64 {
+func Average[S ~[]T, T RealNumber](list S) float64 {
 	if len(list) == 0 {
 		return 0
 	}
@@ -78,7 +78,7 @@ func Average[T RealNumber](list []T) float64 {
 }
 
 // Find - always uses linear search
-func Find[T comparable](slice []T, value T) int {
+func Find[S ~[]T, T comparable](slice S, value T) int {
 	for i, v := range slice {
 		if v == value {
 			return i
@@ -87,7 +87,7 @@ func Find[T comparable](slice []T, value T) int {
 	return NotFound
 }
 
-func BinarySearch[T cmp.Ordered](slice []T, value T) int {
+func BinarySearch[S ~[]T, T cmp.Ordered](slice S, value T) int {
 	if len(slice) == 0 {
 		return NotFound
 	}
@@ -107,7 +107,7 @@ func BinarySearch[T cmp.Ordered](slice []T, value T) int {
 	return NotFound
 }
 
-func Median[T cmp.Ordered](list []T) T {
+func Median[S ~[]T, T cmp.Ordered](list S) T {
 	if len(list) == 0 {
 		var zero T
 		return zero
