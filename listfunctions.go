@@ -175,10 +175,16 @@ func formatIndicesReversed(indices List[int]) List[int] {
 }
 
 func indicesAreFormattedReversed(indices List[int]) bool {
-	return indices.ForAll(func(index int) bool {
+	if indices.Len() <= 1 {
+		return true
+	}
+	for index, item := range indices {
 		if index == indices.Len()-1 {
 			return true
 		}
-		return indices[index] > indices[index+1]
-	})
+		if item <= indices[index+1] {
+			return false
+		}
+	}
+	return true
 }
