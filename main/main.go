@@ -1,8 +1,13 @@
 package main
 
-import . "github.com/KeylimeVI/kl"
+import (
+	"fmt"
+	. "github.com/KeylimeVI/kl"
+)
 
 func main() {
-	l := &List[int]{5, 2, 4}
-	Min(l)
+	l := NewList[string]("a", "b", "c", "d", "e", "f")
+	fmt.Println(l)
+	l.Remove(1, 3, 5)
+	fmt.Println(l)
 }

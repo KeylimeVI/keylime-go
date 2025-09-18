@@ -162,3 +162,23 @@ func partition[T cmp.Ordered](arr []T, left, right int) int {
 	arr[i], arr[right] = arr[right], arr[i]
 	return i
 }
+
+func formatIndicesReversed(indices List[int]) List[int] {
+	if indices.Len() <= 1 {
+		return indices
+	}
+	indicesSet := NewSet[int](indices...)
+	indicesList := indicesSet.ToList()
+	Sort[List[int], int](indicesList)
+	indicesList.Reverse()
+	return indicesList
+}
+
+func indicesAreFormattedReversed(indices List[int]) bool {
+	return indices.ForAll(func(index int) bool {
+		if index == indices.Len()-1 {
+			return true
+		}
+		return indices[index] <= indices[index+1]
+	})
+}

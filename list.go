@@ -54,44 +54,40 @@ func (l *List[T]) Get(i int) (T, bool) {
 	return (*l)[i], true
 }
 
-// Remove the item at index i
-func (l *List[T]) Remove(i int) bool {
-	if l.IsEmpty() {
-		return false
-	}
-	if !l.ValidIndex(i) {
-		return false
-	}
-	if i == len(*l)-1 {
-		*l = (*l)[:i]
-		return true
-	}
-	*l = append((*l)[:i], (*l)[i+1:]...)
-	return true
-}
+// Remove the items at indices, returns false if any of the indices are out of bounds
+func (l *List[T]) Remove(indices ...int) bool {
 
-// RemoveAll removes any items at the specified indices
-// Returns false if any of the indices are out of bounds
-func (l *List[T]) RemoveAll(indices ...int) bool {
-	if l.IsEmpty() {
-		return false
-	}
 	if len(indices) == 0 {
 		return true
 	}
-	indicesSet := NewSet[int](indices...)
-	for index := range indicesSet {
-		if !l.ValidIndex(index) {
+
+	if l.IsEmpty() {
+		return false
+	}
+
+	if len(indices) == 1 {
+		if !l.ValidIndex(indices[0]) {
 			return false
 		}
+		*l = append((*l)[:indices[0]], (*l)[indices[0]+1:]...)
+		return true
 	}
-	indicesList := indicesSet.ToList()
-	Sort[List[int], int](indicesList)
-	indicesList.Reverse()
-	for _, index := range indicesList {
-		l.Remove(index)
+
+	if !indicesAreFormattedReversed(indices) {
+		indices = formatIndicesReversed(indices)
 	}
-	return true
+
+	indicesList := NewList[int](indices...)
+
+	if !indicesList.ForAll(func(index int) bool {
+		return l.ValidIndex(index)
+	}) {
+		return false
+	}
+
+	*l = append((*l)[:indices[0]], (*l)[indices[0]+1:]...)
+
+	return l.Remove(indicesList[1:]...)
 }
 
 func (l *List[T]) RemoveAny(indices ...int) *List[T] {
