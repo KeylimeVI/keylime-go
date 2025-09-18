@@ -54,7 +54,7 @@ func (l *List[T]) Get(i int) (T, bool) {
 	return (*l)[i], true
 }
 
-// Remove the items at indices, returns false if any of the indices are out of bounds
+// Remove the items at indices, gives up and returns false if any of the indices are out of bounds
 func (l *List[T]) Remove(indices ...int) bool {
 
 	if len(indices) == 0 {
@@ -66,10 +66,12 @@ func (l *List[T]) Remove(indices ...int) bool {
 	}
 
 	if len(indices) == 1 {
-		if !l.ValidIndex(indices[0]) {
+		index := indices[0]
+
+		if !l.ValidIndex(index) {
 			return false
 		}
-		*l = append((*l)[:indices[0]], (*l)[indices[0]+1:]...)
+		*l = append((*l)[:index], (*l)[index+1:]...)
 		return true
 	}
 
@@ -91,18 +93,11 @@ func (l *List[T]) Remove(indices ...int) bool {
 }
 
 func (l *List[T]) RemoveAny(indices ...int) *List[T] {
-	if l.IsEmpty() {
-		return l
-	}
-	indicesSet := NewSet[int](indices...)
-	indicesList := indicesSet.ToList()
-	Sort[List[int], int](indicesList)
-	indicesList.Reverse()
-	for _, index := range indicesList {
-		if l.ValidIndex(index) {
-			l.Remove(index)
-		}
-	}
+	indicesList := formatIndicesReversed(indices)
+	indicesList = indicesList.Filter(func(index int) bool {
+		return l.ValidIndex(index)
+	})
+	l.Remove(indicesList...)
 	return l
 }
 
