@@ -179,6 +179,6 @@ func indicesAreFormattedReversed(indices List[int]) bool {
 		if index == indices.Len()-1 {
 			return true
 		}
-		return indices[index] >= indices[index+1]
+		return indices[index] > indices[index+1]
 	})
 }
