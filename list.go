@@ -20,8 +20,8 @@ func NewListWithCapacity[T any](capacity int, vals ...T) List[T] {
 	return list
 }
 
-// Append vals to the end of the list
-func (l *List[T]) Append(vals ...T) *List[T] {
+// Add vals to the end of the list
+func (l *List[T]) Add(vals ...T) *List[T] {
 	*l = append(*l, vals...)
 	return l
 }
@@ -174,13 +174,13 @@ func (l *List[T]) Insert(index int, values ...T) bool {
 		return false
 	}
 	if index == len(*l) {
-		l.Append(values...)
+		l.Add(values...)
 		return true
 	}
 	prev := (*l)[:index]
 	after := (*l)[index:]
 	*l = append(prev, values...)
-	l.Append(after...)
+	l.Add(after...)
 	return true
 }
 

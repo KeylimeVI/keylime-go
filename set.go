@@ -18,8 +18,8 @@ func (s *Set[T]) IsEmpty() bool {
 	return len(*s) == 0
 }
 
-// Append items to set
-func (s *Set[T]) Append(items ...T) {
+// Add items to set
+func (s *Set[T]) Add(items ...T) {
 	for _, item := range items {
 		(*s)[item] = struct{}{}
 	}

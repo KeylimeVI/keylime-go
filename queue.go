@@ -9,7 +9,7 @@ func NewQueue[T any]() Queue[T] {
 }
 
 func (q *Queue[T]) Enqueue(items ...T) *Queue[T] {
-	q.list.Append(items...)
+	q.list.Add(items...)
 	return q
 }
 

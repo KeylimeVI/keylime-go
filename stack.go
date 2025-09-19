@@ -9,7 +9,7 @@ func NewStack[T any]() Stack[T] {
 }
 
 func (s *Stack[T]) Push(items ...T) {
-	s.list.Append(items...)
+	s.list.Add(items...)
 }
 
 func (s *Stack[T]) Pop() (T, bool) {

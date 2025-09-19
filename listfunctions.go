@@ -72,7 +72,7 @@ func Average[S ~[]T, T RealNumber](list S) float64 {
 	}
 	floatList := NewListWithCapacity[float64](len(list))
 	for _, item := range list {
-		floatList.Append(float64(item))
+		floatList.Add(float64(item))
 	}
 	return Sum(floatList) / float64(len(list))
 }

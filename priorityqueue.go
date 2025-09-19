@@ -112,7 +112,7 @@ func (pq *PriorityQueue[T]) ToList() List[T] {
 	result := NewList[T]()
 	for p := range pq.priorities {
 		q, _ := pq.queues.Get(p)
-		result.Append(q.ToList()...)
+		result.Add(q.ToList()...)
 	}
 	return result
 }
@@ -122,7 +122,7 @@ func (pq *PriorityQueue[T]) ToSlice() []T {
 	result := NewList[T]()
 	for p := range pq.priorities {
 		q, _ := pq.queues.Get(p)
-		result.Append(q.ToList()...)
+		result.Add(q.ToList()...)
 	}
 	return result.ToSlice()
 }
