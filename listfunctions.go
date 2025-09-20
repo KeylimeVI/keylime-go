@@ -51,6 +51,12 @@ func Sort[S ~[]T, T cmp.Ordered](list S) {
 	slices.Sort[S, T](list)
 }
 
+func Sorted[S ~[]T, T cmp.Ordered](list S) S {
+	result := list
+	Sort(result)
+	return result
+}
+
 // IsSorted returns true if the list is sorted
 func IsSorted[S ~[]T, T cmp.Ordered](list S) bool {
 	if list == nil || len(list) <= 1 {
@@ -137,6 +143,21 @@ func Median[S ~[]T, T cmp.Ordered](list S) T {
 	// Since we can't assume arithmetic operations, return the lower one
 	// Or if T is numeric, we could average them
 	return left
+}
+
+func RemoveDuplicates[S ~[]T, T comparable](list S) {
+	if len(list) <= 1 {
+		return
+	}
+	set := make(map[T]struct{}, len(list))
+	for _, item := range list {
+		set[item] = struct{}{}
+	}
+	var result S
+	for item := range set {
+		result = append(result, item)
+	}
+	list = result
 }
 
 func quickSelect[T cmp.Ordered](arr []T, left, right, k int) T {
