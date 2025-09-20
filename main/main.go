@@ -14,4 +14,16 @@ func main() {
 	fmt.Println(l)
 	ok := l.Remove(0, 5, 7, -3)
 	fmt.Println(ok, l)
+	plus3 := func(x int) int { return x + 3 }
+	plus4 := func(x int) int { return x + 4 }
+	minus2 := func(x int) int { return x - 2 }
+	lf := NewList(plus3, plus4, minus2)
+	li := NewList(1, 2, 3, 4, 5)
+	fmt.Println(li)
+	things := li.Mapped(lf[0])
+	lf.ForEach(func(f func(int) int) {
+		things.Map(f)
+		fmt.Println(things)
+	})
+	fmt.Println(things)
 }
