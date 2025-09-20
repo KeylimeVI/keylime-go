@@ -85,7 +85,7 @@ func (l *List[T]) Remove(indices ...int) bool {
 
 	indicesList := NewList[int](indices...)
 
-	if !indicesList.ForAll(func(index int) bool {
+	if !indicesList.All(func(index int) bool {
 		return l.ValidIndex(index)
 	}) {
 		return false
@@ -288,7 +288,7 @@ func (l *List[T]) Mapped(f func(T) T) List[T] {
 	return result
 }
 
-func (l *List[T]) ThereExists(predicate func(T) bool) bool {
+func (l *List[T]) Any(predicate func(T) bool) bool {
 	for _, item := range *l {
 		if predicate(item) {
 			return true
@@ -297,7 +297,7 @@ func (l *List[T]) ThereExists(predicate func(T) bool) bool {
 	return false
 }
 
-func (l *List[T]) ForAll(predicate func(T) bool) bool {
+func (l *List[T]) All(predicate func(T) bool) bool {
 	for _, item := range *l {
 		if !predicate(item) {
 			return false
