@@ -14,9 +14,18 @@ type RealNumber interface {
 const NotFound = -1
 
 // Contains returns true if the list contains the value
-func Contains[T comparable](list []T, value T) bool {
-	for _, item := range list {
-		if item == value {
+func Contains[S ~[]T, T comparable](list S, values ...T) bool {
+	for _, value := range values {
+		if !singleContains(list, value) {
+			return false
+		}
+	}
+	return true
+}
+
+func ContainsAny[S ~[]T, T comparable](list S, values ...T) bool {
+	for _, value := range values {
+		if singleContains(list, value) {
 			return true
 		}
 	}
@@ -186,5 +195,22 @@ func indicesAreFormattedReversed(indices List[int]) bool {
 			return false
 		}
 	}
+	return true
+}
+
+func singleContains[S ~[]T, T comparable](list S, value T) bool {
+	for _, item := range list {
+		if item == value {
+			return true
+		}
+	}
+	return false
+}
+
+func (l *List[T]) singleSet(index int, value T) bool {
+	if !l.ValidIndex(index) {
+		return false
+	}
+	(*l)[index] = value
 	return true
 }

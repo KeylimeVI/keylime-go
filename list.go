@@ -26,6 +26,10 @@ func (l *List[T]) Add(vals ...T) *List[T] {
 	return l
 }
 
+func (l *List[T]) Added(vals ...T) List[T] {
+	return append(*l, vals...)
+}
+
 // Len returns the length of the list
 func (l *List[T]) Len() int {
 	return len(*l)
@@ -94,11 +98,17 @@ func (l *List[T]) Remove(indices ...int) bool {
 
 func (l *List[T]) RemoveAny(indices ...int) *List[T] {
 	indicesList := formatIndicesReversed(indices)
-	indicesList = indicesList.Filter(func(index int) bool {
+	indicesList = indicesList.Filtered(func(index int) bool {
 		return l.ValidIndex(index)
 	})
 	l.Remove(indicesList...)
 	return l
+}
+
+func (l *List[T]) RemovedAny(indices ...int) List[T] {
+	answer := l.Copy()
+	answer.RemoveAny(indices...)
+	return answer
 }
 
 // IsEmpty returns true if the list is empty
@@ -155,6 +165,12 @@ func (l *List[T]) Reverse() *List[T] {
 	return l
 }
 
+func (l *List[T]) Reversed() List[T] {
+	answer := l.Copy()
+	answer.Reverse()
+	return answer
+}
+
 // Shuffle randomizes the order of elements in the list (in-place)
 func (l *List[T]) Shuffle() *List[T] {
 	if l.IsEmpty() || len(*l) <= 1 {
@@ -166,6 +182,12 @@ func (l *List[T]) Shuffle() *List[T] {
 		arr[i], arr[j] = arr[j], arr[i]
 	}
 	return l
+}
+
+func (l *List[T]) Shuffled() List[T] {
+	answer := l.Copy()
+	answer.Shuffle()
+	return answer
 }
 
 // Insert inserts values at the specified index
@@ -184,6 +206,12 @@ func (l *List[T]) Insert(index int, values ...T) bool {
 	return true
 }
 
+func (l *List[T]) Inserted(index int, values ...T) List[T] {
+	answer := l.Copy()
+	answer.Insert(index, values...)
+	return answer
+}
+
 // Set replaces the element at the specified index
 func (l *List[T]) Set(index int, value T) bool {
 	if !l.ValidIndex(index) {
@@ -193,6 +221,12 @@ func (l *List[T]) Set(index int, value T) bool {
 	return true
 }
 
+func (l *List[T]) Setted(index int, value T) List[T] {
+	answer := l.Copy()
+	answer.Set(index, value)
+	return answer
+}
+
 // Swap exchanges elements at two indices
 func (l *List[T]) Swap(i, j int) bool {
 	if !l.ValidIndex(i) || !l.ValidIndex(j) {
@@ -200,6 +234,12 @@ func (l *List[T]) Swap(i, j int) bool {
 	}
 	(*l)[i], (*l)[j] = (*l)[j], (*l)[i]
 	return true
+}
+
+func (l *List[T]) Swapped(i, j int) List[T] {
+	answer := l.Copy()
+	answer.Swap(i, j)
+	return answer
 }
 
 // Copy returns a new copy of the list
@@ -220,13 +260,31 @@ func (l *List[T]) Slice(start int, end int) (List[T], bool) {
 	return (*l)[start:end], true
 }
 
-func (l *List[T]) Filter(predicate func(T) bool) List[T] {
+func (l *List[T]) Filter(predicate func(T) bool) *List[T] {
+	*l = l.Filtered(predicate)
+	return l
+}
+
+func (l *List[T]) Filtered(predicate func(T) bool) List[T] {
 	result := NewList[T]()
 	for _, item := range *l {
 		if predicate(item) {
 			result = append(result, item)
 		}
 	}
+	return result
+}
+
+func (l *List[T]) Map(f func(T) T) *List[T] {
+	for i, item := range *l {
+		(*l)[i] = f(item)
+	}
+	return l
+}
+
+func (l *List[T]) Mapped(f func(T) T) List[T] {
+	result := l.Copy()
+	result.Map(f)
 	return result
 }
 
