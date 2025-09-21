@@ -40,6 +40,20 @@ func Reduce[T any, U any](slice []T, initial U, reducer func(accumulator U, valu
 	return result
 }
 
+func Flatten[T any, Slice ~[]T](collection []Slice) Slice {
+	totalLen := 0
+	for i := range collection {
+		totalLen += len(collection[i])
+	}
+
+	result := make(Slice, 0, totalLen)
+	for i := range collection {
+		result = append(result, collection[i]...)
+	}
+
+	return result
+}
+
 // Sort sorts any slice-like type in-place using the quicksort algorithm
 func Sort[S ~[]T, T cmp.Ordered](list *S) {
 	if list == nil {
