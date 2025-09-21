@@ -21,7 +21,7 @@ type PriorityQueue[T any] struct {
 	priorities set.Set[Priority]
 }
 
-func NewPriorityQueue[T any]() PriorityQueue[T] {
+func New[T any]() PriorityQueue[T] {
 	pq := PriorityQueue[T]{
 		queues:     &hashmap.Map[Priority, *queue.Queue[T]]{},
 		priorities: set.NewSet(Critical, High, Medium, Low), // order matters
@@ -34,7 +34,7 @@ func NewPriorityQueue[T any]() PriorityQueue[T] {
 	return pq
 }
 
-func NewCustomPriorityQueue[T any](priorities set.Set[Priority]) PriorityQueue[T] {
+func NewCustom[T any](priorities set.Set[Priority]) PriorityQueue[T] {
 	pq := PriorityQueue[T]{
 		queues:     &hashmap.Map[Priority, *queue.Queue[T]]{},
 		priorities: priorities,

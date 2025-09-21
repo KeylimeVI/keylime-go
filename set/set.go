@@ -16,6 +16,14 @@ func NewSet[T comparable](items ...T) Set[T] {
 	return s
 }
 
+func NewSetWithCapacity[T comparable](capacity int, items ...T) Set[T] {
+	s := make(Set[T], capacity)
+	for _, item := range items {
+		s[item] = struct{}{}
+	}
+	return s
+}
+
 // IsEmpty Check if set is empty
 func (s *Set[T]) IsEmpty() bool {
 	return len(*s) == 0
