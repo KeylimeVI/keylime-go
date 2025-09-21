@@ -20,9 +20,14 @@ func Sequence(args ...int) <-chan int {
 		if step <= 0 && start <= stop {
 			return
 		}
-
-		for i := start; i < stop; i += step {
-			ch <- i
+		if stop < start {
+			for i := start; i > stop; i += step {
+				ch <- i
+			}
+		} else {
+			for i := start; i < stop; i += step {
+				ch <- i
+			}
 		}
 	}()
 	return ch

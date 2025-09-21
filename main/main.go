@@ -12,7 +12,7 @@ func main() {
 	fmt.Println(l)
 	Sort(&l)
 	fmt.Println(l)
-	for i := range sequence.Sequence(0, 6, -2) {
+	for i := range sequence.Sequence(6, 0, -2) {
 		fmt.Println(i)
 	}
 }
