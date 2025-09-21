@@ -1,11 +1,13 @@
-package kl
+package queue
+
+import list2 "github.com/KeylimeVI/kl/list"
 
 type Queue[T any] struct {
-	list List[T]
+	list list2.List[T]
 }
 
 func NewQueue[T any]() Queue[T] {
-	return Queue[T]{list: NewList[T]()}
+	return Queue[T]{list: list2.NewList[T]()}
 }
 
 func (q *Queue[T]) Enqueue(items ...T) *Queue[T] {
@@ -38,7 +40,7 @@ func (q *Queue[T]) Copy() *Queue[T] {
 	return &Queue[T]{list: q.list.Copy()}
 }
 
-func (q *Queue[T]) ToList() List[T] {
+func (q *Queue[T]) ToList() list2.List[T] {
 	return q.list.Copy()
 }
 

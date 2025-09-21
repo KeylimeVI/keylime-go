@@ -1,11 +1,13 @@
-package kl
+package stack
+
+import list2 "github.com/KeylimeVI/kl/list"
 
 type Stack[T any] struct {
-	list List[T]
+	list list2.List[T]
 }
 
 func NewStack[T any]() Stack[T] {
-	return Stack[T]{list: NewList[T]()}
+	return Stack[T]{list: list2.NewList[T]()}
 }
 
 func (s *Stack[T]) Push(items ...T) {
@@ -41,7 +43,7 @@ func (s *Stack[T]) Copy() *Stack[T] {
 	return &Stack[T]{list: s.list.Copy()}
 }
 
-func (s *Stack[T]) ToList() List[T] {
+func (s *Stack[T]) ToList() list2.List[T] {
 	return s.list.Copy()
 }
 

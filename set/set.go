@@ -1,6 +1,9 @@
-package kl
+package set
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/KeylimeVI/kl/list"
+)
 
 type Set[T comparable] map[T]struct{}
 
@@ -69,8 +72,8 @@ func (s *Set[T]) ToSlice() []T {
 	return slice
 }
 
-func (s *Set[T]) ToList() List[T] {
-	return NewList[T](s.ToSlice()...)
+func (s *Set[T]) ToList() list.List[T] {
+	return list.NewList[T](s.ToSlice()...)
 }
 
 // SubsetOf Check if this set is a subset of another set

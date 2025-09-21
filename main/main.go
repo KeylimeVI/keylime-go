@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	. "github.com/KeylimeVI/kl"
+	. "github.com/KeylimeVI/kl/list"
 	"github.com/KeylimeVI/kl/sequence"
 )
 

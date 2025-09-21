@@ -1,4 +1,11 @@
-package kl
+package priorityqueue
+
+import (
+	"github.com/KeylimeVI/kl/list"
+	"github.com/KeylimeVI/kl/map"
+	"github.com/KeylimeVI/kl/queue"
+	"github.com/KeylimeVI/kl/set"
+)
 
 type Priority = int
 
@@ -10,31 +17,31 @@ const (
 )
 
 type PriorityQueue[T any] struct {
-	queues     *Map[Priority, *Queue[T]]
-	priorities Set[Priority]
+	queues     *hashmap.Map[Priority, *queue.Queue[T]]
+	priorities set.Set[Priority]
 }
 
 func NewPriorityQueue[T any]() PriorityQueue[T] {
 	pq := PriorityQueue[T]{
-		queues:     &Map[Priority, *Queue[T]]{},
-		priorities: NewSet(Critical, High, Medium, Low), // order matters
+		queues:     &hashmap.Map[Priority, *queue.Queue[T]]{},
+		priorities: set.NewSet(Critical, High, Medium, Low), // order matters
 	}
 	// init queues for each priority
 	for p := range pq.priorities {
-		q := NewQueue[T]()
+		q := queue.NewQueue[T]()
 		pq.queues.Set(p, &q)
 	}
 	return pq
 }
 
-func NewCustomPriorityQueue[T any](priorities Set[Priority]) PriorityQueue[T] {
+func NewCustomPriorityQueue[T any](priorities set.Set[Priority]) PriorityQueue[T] {
 	pq := PriorityQueue[T]{
-		queues:     &Map[Priority, *Queue[T]]{},
+		queues:     &hashmap.Map[Priority, *queue.Queue[T]]{},
 		priorities: priorities,
 	}
 	// init queues for each priority
 	for p := range pq.priorities {
-		q := NewQueue[T]()
+		q := queue.NewQueue[T]()
 		pq.queues.Set(p, &q)
 	}
 	return pq
@@ -97,7 +104,7 @@ func (pq *PriorityQueue[T]) Clear() {
 // Copy returns a deep copy of the PriorityQueue.
 func (pq *PriorityQueue[T]) Copy() *PriorityQueue[T] {
 	newPQ := &PriorityQueue[T]{
-		queues:     &Map[Priority, *Queue[T]]{},
+		queues:     &hashmap.Map[Priority, *queue.Queue[T]]{},
 		priorities: pq.priorities, // copy priorities list
 	}
 	for p := range pq.priorities {
@@ -108,8 +115,8 @@ func (pq *PriorityQueue[T]) Copy() *PriorityQueue[T] {
 }
 
 // ToList returns all elements from all priorities as a List, ordered by priority.
-func (pq *PriorityQueue[T]) ToList() List[T] {
-	result := NewList[T]()
+func (pq *PriorityQueue[T]) ToList() list.List[T] {
+	result := list.NewList[T]()
 	for p := range pq.priorities {
 		q, _ := pq.queues.Get(p)
 		result.Add(q.ToList()...)
@@ -119,7 +126,7 @@ func (pq *PriorityQueue[T]) ToList() List[T] {
 
 // ToSlice returns all elements from all priorities as a slice, ordered by priority.
 func (pq *PriorityQueue[T]) ToSlice() []T {
-	result := NewList[T]()
+	result := list.NewList[T]()
 	for p := range pq.priorities {
 		q, _ := pq.queues.Get(p)
 		result.Add(q.ToList()...)

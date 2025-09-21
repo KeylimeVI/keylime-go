@@ -1,4 +1,8 @@
-package kl
+package hashmap
+
+import (
+	"github.com/KeylimeVI/kl/list"
+)
 
 type Map[K comparable, V any] map[K]V
 
@@ -61,8 +65,8 @@ func (m *Map[K, V]) Keys() []K {
 	return keys
 }
 
-func (m *Map[K, V]) ListKeys() List[K] {
-	return NewList[K](m.Keys()...)
+func (m *Map[K, V]) ListKeys() list.List[K] {
+	return list.NewList[K](m.Keys()...)
 }
 
 func (m *Map[K, V]) Values() []V {
@@ -73,8 +77,8 @@ func (m *Map[K, V]) Values() []V {
 	return values
 }
 
-func (m *Map[K, V]) ListValues() List[V] {
-	return NewList[V](m.Values()...)
+func (m *Map[K, V]) ListValues() list.List[V] {
+	return list.NewList[V](m.Values()...)
 }
 
 func (m *Map[K, V]) ToNativeMap() map[K]V {
