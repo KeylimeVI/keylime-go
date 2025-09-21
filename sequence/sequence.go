@@ -17,7 +17,7 @@ func Sequence(args ...int) <-chan int {
 			return
 		}
 
-		if step <= 0 {
+		if step <= 0 && start <= stop {
 			return
 		}
 
