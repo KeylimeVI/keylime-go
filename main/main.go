@@ -7,6 +7,8 @@ import (
 
 func main() {
 	l := NewList(3, 2, 1, 1, 2, 3)
-	RemoveDuplicates(l)
+	RemoveDuplicates(&l)
+	fmt.Println(l)
+	Sort(&l)
 	fmt.Println(l)
 }

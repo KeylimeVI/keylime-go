@@ -32,28 +32,28 @@ func ContainsAny[S ~[]T, T comparable](list S, values ...T) bool {
 	return false
 }
 
-func Reduce[T any, U any](list []T, initial U, f func(accumulator U, value T) U) U {
+func Reduce[T any, U any](slice []T, initial U, reducer func(accumulator U, value T) U) U {
 	result := initial
-	for _, item := range list {
-		result = f(result, item)
+	for _, item := range slice {
+		result = reducer(result, item)
 	}
 	return result
 }
 
 // Sort sorts any slice-like type in-place using the quicksort algorithm
-func Sort[S ~[]T, T cmp.Ordered](list S) {
+func Sort[S ~[]T, T cmp.Ordered](list *S) {
 	if list == nil {
 		return
 	}
-	if IsSorted(list) {
+	if IsSorted(*list) {
 		return
 	}
-	slices.Sort[S, T](list)
+	slices.Sort[S, T](*list)
 }
 
 func Sorted[S ~[]T, T cmp.Ordered](list S) S {
-	result := list
-	Sort(result)
+	result := copyList(list)
+	Sort(&result)
 	return result
 }
 
@@ -108,7 +108,7 @@ func BinarySearch[S ~[]T, T cmp.Ordered](slice S, value T) int {
 	}
 	if !IsSorted(slice) {
 		sortedSlice := NewList[T](slice...)
-		Sort(sortedSlice)
+		Sort(&sortedSlice)
 		i, ok := slices.BinarySearch(sortedSlice, value)
 		if ok {
 			return i
@@ -145,19 +145,25 @@ func Median[S ~[]T, T cmp.Ordered](list S) T {
 	return left
 }
 
-func RemoveDuplicates[S ~[]T, T comparable](list S) {
-	if len(list) <= 1 {
+func RemoveDuplicates[S ~[]T, T comparable](list *S) {
+	if len(*list) <= 1 {
 		return
 	}
-	set := make(map[T]struct{}, len(list))
-	for _, item := range list {
+	set := make(map[T]struct{}, len(*list))
+	for _, item := range *list {
 		set[item] = struct{}{}
 	}
-	var result S
+	result := make(S, 0, len(set))
 	for item := range set {
 		result = append(result, item)
 	}
-	list = result
+	*list = result
+}
+
+func DuplicatesRemoved[S ~[]T, T comparable](list S) S {
+	result := copyList(list)
+	RemoveDuplicates(&result)
+	return result
 }
 
 func quickSelect[T cmp.Ordered](arr []T, left, right, k int) T {
@@ -197,11 +203,10 @@ func formatIndicesReversed(indices List[int]) List[int] {
 	if indices.Len() <= 1 {
 		return indices
 	}
-	indicesSet := NewSet[int](indices...)
-	indicesList := indicesSet.ToList()
-	Sort[List[int], int](indicesList)
-	indicesList.Reverse()
-	return indicesList
+	RemoveDuplicates(&indices)
+	Sort[List[int], int](&indices)
+	indices.Reverse()
+	return indices
 }
 
 func indicesAreFormattedReversed(indices List[int]) bool {
@@ -234,4 +239,10 @@ func (l *List[T]) singleSet(index int, value T) bool {
 	}
 	(*l)[index] = value
 	return true
+}
+
+func copyList[S ~[]T, T any](list S) S {
+	result := make(S, len(list))
+	copy(result, list)
+	return result
 }
