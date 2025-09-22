@@ -61,20 +61,14 @@ func (l *List[T]) Get(i int) (T, bool) {
 
 // Remove the items at indices, gives up and returns an error if any of the indices are out of bounds
 func (l *List[T]) Remove(indices ...int) error {
-
 	if len(indices) == 0 {
 		return nil
 	}
 
-	if l.IsEmpty() {
-		return IndexOutOfBoundsError
-	}
-
 	if len(indices) == 1 {
 		index := indices[0]
-
 		if !l.ValidIndex(index) {
-			return IndexOutOfBoundsError
+			return NewIndexError(index, l.Len())
 		}
 		*l = append((*l)[:index], (*l)[index+1:]...)
 		return nil
@@ -89,7 +83,13 @@ func (l *List[T]) Remove(indices ...int) error {
 	if !indicesList.All(func(index int) bool {
 		return l.ValidIndex(index)
 	}) {
-		return IndexOutOfBoundsError
+		// Return context for the first offending index
+		for _, idx := range indicesList {
+			if !l.ValidIndex(idx) {
+				return NewIndexError(idx, l.Len())
+			}
+		}
+		return IndexOutOfBoundsError // fallback; shouldn't reach
 	}
 
 	*l = append((*l)[:indices[0]], (*l)[indices[0]+1:]...)
@@ -134,21 +134,23 @@ func (l *List[T]) Clear() *List[T] {
 }
 
 // Pop the last item in the list, or the item at i if specified, and return it
-// Returns false if the index is out of bounds or if multiple indices are specified
+// Returns an error if the index is out of bounds or if multiple indices are specified
 func (l *List[T]) Pop(i ...int) (T, error) {
 	var zero T
-	if l.IsEmpty() {
-		return zero, EmptyListError
-	}
 	if len(i) > 1 {
 		return zero, TooManyArgumentsError
 	}
 	if len(i) == 1 {
-		if !l.ValidIndex(i[0]) {
-			return zero, IndexOutOfBoundsError
+		idx := i[0]
+		if !l.ValidIndex(idx) {
+			return zero, NewIndexError(idx, l.Len())
 		}
-		item := (*l)[i[0]]
+		item := (*l)[idx]
 		return item, nil
+	}
+	// No index provided: emptiness is the only precondition here
+	if l.IsEmpty() {
+		return zero, EmptyListError
 	}
 	return (*l)[len(*l)-1], nil
 }
@@ -194,7 +196,7 @@ func (l *List[T]) Shuffled() List[T] {
 // Insert inserts values at the specified index
 func (l *List[T]) Insert(index int, values ...T) error {
 	if !l.ValidIndexLoose(index) {
-		return IndexOutOfBoundsError
+		return NewIndexError(index, l.Len())
 	}
 	if index == len(*l) {
 		l.Add(values...)
@@ -216,7 +218,7 @@ func (l *List[T]) Inserted(index int, values ...T) List[T] {
 // Set replaces the element at the specified index
 func (l *List[T]) Set(index int, value T) error {
 	if !l.ValidIndex(index) {
-		return IndexOutOfBoundsError
+		return NewIndexError(index, l.Len())
 	}
 	(*l)[index] = value
 	return nil
@@ -230,8 +232,11 @@ func (l *List[T]) Setted(index int, value T) List[T] {
 
 // Swap exchanges elements at two indices
 func (l *List[T]) Swap(i, j int) error {
-	if !l.ValidIndex(i) || !l.ValidIndex(j) {
-		return IndexOutOfBoundsError
+	if !l.ValidIndex(i) {
+		return NewIndexError(i, l.Len())
+	}
+	if !l.ValidIndex(j) {
+		return NewIndexError(j, l.Len())
 	}
 	(*l)[i], (*l)[j] = (*l)[j], (*l)[i]
 	return nil

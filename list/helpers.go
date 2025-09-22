@@ -3,6 +3,7 @@ package list
 import (
 	"cmp"
 	"errors"
+	"fmt"
 )
 
 // Exported sentinel errors (preferred names)
@@ -11,6 +12,36 @@ var (
 	TooManyArgumentsError = errors.New("too many arguments for this method")
 	IndexOutOfBoundsError = errors.New("index out of bounds")
 )
+
+// IndexError provides structured context for invalid index operations.
+// It unwraps to the IndexOutOfBoundsError sentinel so callers can use errors.Is.
+type IndexError struct {
+	index  int
+	length int
+}
+
+func (e IndexError) Error() string {
+	if e.index < 0 {
+		return fmt.Sprintf("index out of bounds: index = %d", e.index)
+	}
+	if e.length == 0 {
+		return fmt.Sprintf("list is empty: length of list = %d", e.length)
+	}
+	return fmt.Sprintf("index out of bounds: index = %d, length of list = %d", e.index, e.length)
+
+}
+
+// Unwrap enables errors.Is(err, IndexOutOfBoundsError).
+func (e IndexError) Unwrap() error { return IndexOutOfBoundsError }
+
+// Accessors for structured data without exporting fields.
+func (e IndexError) Index() int  { return e.index }
+func (e IndexError) Length() int { return e.length }
+
+// NewIndexError constructs a typed index error with context.
+func NewIndexError(index int, length int) error {
+	return IndexError{index: index, length: length}
+}
 
 func quickSelect[T cmp.Ordered](arr []T, left, right, k int) T {
 	if left == right {
