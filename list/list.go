@@ -5,15 +5,16 @@ import (
 	"math/rand"
 )
 
-// List is a generic type definition of Slice that provides useful methods and ease of use
+// List is a generic type alias of []T with useful methods and functions
 type List[T any] []T
 
+// NewList creates a new List with the specified values
 func NewList[T any](vals ...T) List[T] {
 	list := List[T](vals)
 	return list
 }
 
-// NewListWithCapacity creates a new list with the specified capacity
+// NewListWithCapacity creates a new List with the specified capacity and values
 func NewListWithCapacity[T any](capacity int, vals ...T) List[T] {
 	list := make(List[T], 0, capacity)
 	list = append(list, vals...)
@@ -30,7 +31,7 @@ func (l *List[T]) Added(vals ...T) List[T] {
 	return append(*l, vals...)
 }
 
-// Len returns the length of the list
+// Len returns the len of the list
 func (l *List[T]) Len() int {
 	return len(*l)
 }
@@ -58,25 +59,25 @@ func (l *List[T]) Get(i int) (T, bool) {
 	return (*l)[i], true
 }
 
-// Remove the items at indices, gives up and returns false if any of the indices are out of bounds
-func (l *List[T]) Remove(indices ...int) bool {
+// Remove the items at indices, gives up and returns an error if any of the indices are out of bounds
+func (l *List[T]) Remove(indices ...int) error {
 
 	if len(indices) == 0 {
-		return true
+		return nil
 	}
 
 	if l.IsEmpty() {
-		return false
+		return IndexOutOfBoundsError
 	}
 
 	if len(indices) == 1 {
 		index := indices[0]
 
 		if !l.ValidIndex(index) {
-			return false
+			return IndexOutOfBoundsError
 		}
 		*l = append((*l)[:index], (*l)[index+1:]...)
-		return true
+		return nil
 	}
 
 	if !indicesAreFormattedReversed(indices) {
@@ -88,7 +89,7 @@ func (l *List[T]) Remove(indices ...int) bool {
 	if !indicesList.All(func(index int) bool {
 		return l.ValidIndex(index)
 	}) {
-		return false
+		return IndexOutOfBoundsError
 	}
 
 	*l = append((*l)[:indices[0]], (*l)[indices[0]+1:]...)
@@ -101,11 +102,11 @@ func (l *List[T]) RemoveAny(indices ...int) *List[T] {
 	indicesList = indicesList.Filtered(func(index int) bool {
 		return l.ValidIndex(index)
 	})
-	l.Remove(indicesList...)
+	_ = l.Remove(indicesList...)
 	return l
 }
 
-func (l *List[T]) RemovedAny(indices ...int) List[T] {
+func (l *List[T]) Removed(indices ...int) List[T] {
 	answer := l.Copy()
 	answer.RemoveAny(indices...)
 	return answer
@@ -134,22 +135,22 @@ func (l *List[T]) Clear() *List[T] {
 
 // Pop the last item in the list, or the item at i if specified, and return it
 // Returns false if the index is out of bounds or if multiple indices are specified
-func (l *List[T]) Pop(i ...int) (T, bool) {
+func (l *List[T]) Pop(i ...int) (T, error) {
 	var zero T
 	if l.IsEmpty() {
-		return zero, false
+		return zero, EmptyListError
 	}
 	if len(i) > 1 {
-		return zero, false
+		return zero, TooManyArgumentsError
 	}
 	if len(i) == 1 {
 		if !l.ValidIndex(i[0]) {
-			return zero, false
+			return zero, IndexOutOfBoundsError
 		}
 		item := (*l)[i[0]]
-		return item, true
+		return item, nil
 	}
-	return (*l)[len(*l)-1], true
+	return (*l)[len(*l)-1], nil
 }
 
 // Reverse reverses the elements of the list in-place
@@ -191,54 +192,54 @@ func (l *List[T]) Shuffled() List[T] {
 }
 
 // Insert inserts values at the specified index
-func (l *List[T]) Insert(index int, values ...T) bool {
+func (l *List[T]) Insert(index int, values ...T) error {
 	if !l.ValidIndexLoose(index) {
-		return false
+		return IndexOutOfBoundsError
 	}
 	if index == len(*l) {
 		l.Add(values...)
-		return true
+		return nil
 	}
 	prev := (*l)[:index]
 	after := (*l)[index:]
 	*l = append(prev, values...)
 	l.Add(after...)
-	return true
+	return nil
 }
 
 func (l *List[T]) Inserted(index int, values ...T) List[T] {
 	answer := l.Copy()
-	answer.Insert(index, values...)
+	_ = answer.Insert(index, values...)
 	return answer
 }
 
 // Set replaces the element at the specified index
-func (l *List[T]) Set(index int, value T) bool {
+func (l *List[T]) Set(index int, value T) error {
 	if !l.ValidIndex(index) {
-		return false
+		return IndexOutOfBoundsError
 	}
 	(*l)[index] = value
-	return true
+	return nil
 }
 
 func (l *List[T]) Setted(index int, value T) List[T] {
 	answer := l.Copy()
-	answer.Set(index, value)
+	_ = answer.Set(index, value)
 	return answer
 }
 
 // Swap exchanges elements at two indices
-func (l *List[T]) Swap(i, j int) bool {
+func (l *List[T]) Swap(i, j int) error {
 	if !l.ValidIndex(i) || !l.ValidIndex(j) {
-		return false
+		return IndexOutOfBoundsError
 	}
 	(*l)[i], (*l)[j] = (*l)[j], (*l)[i]
-	return true
+	return nil
 }
 
 func (l *List[T]) Swapped(i, j int) List[T] {
 	answer := l.Copy()
-	answer.Swap(i, j)
+	_ = answer.Swap(i, j)
 	return answer
 }
 
@@ -249,15 +250,14 @@ func (l *List[T]) Copy() List[T] {
 	return c
 }
 
-// Slice returns a new list containing the elements from start (inclusive) to end (exclusive)
-func (l *List[T]) Slice(start int, end int) (List[T], bool) {
-	if !l.ValidIndex(start) || !l.ValidIndexLoose(end) {
-		return nil, false
+func (l *List[T]) Slice(start int, end int) List[T] {
+	if start < 0 {
+		start = 0
 	}
-	if end < start {
-		return nil, false
+	if end < l.Len() {
+		end = l.Len()
 	}
-	return (*l)[start:end], true
+	return (*l)[start:end]
 }
 
 func (l *List[T]) Filter(predicate func(T) bool) *List[T] {
@@ -324,27 +324,28 @@ func (l *List[T]) ForEach(f func(T)) *List[T] {
 	return l
 }
 
-func (l *List[T]) Chunk(size int) []*List[T] {
+func (l *List[T]) Partition(size int) List[List[T]] {
 	if size <= 0 {
 		// Return the whole list as one chunk
-		return []*List[T]{l}
+		return List[List[T]]{l.Copy()}
 	}
 
-	var chunks []*List[T]
+	var parts List[List[T]]
 	for i := 0; i < len(*l); i += size {
 		end := i + size
 		if end > len(*l) {
 			end = len(*l)
 		}
 
-		// Create a new chunk list
-		chunk := &List[T]{}
-		*chunk = append(*chunk, (*l)[i:end]...)
-		chunks = append(chunks, chunk)
+		// Create a new part list
+		part := List[T]{}
+		part = append(part, (*l)[i:end]...)
+		parts = append(parts, part)
 	}
-	return chunks
+	return parts
 }
 
+// ToSlice converts the list to a native slice
 func (l *List[T]) ToSlice() []T {
 	slice := make([]T, len(*l))
 	copy(slice, *l)
