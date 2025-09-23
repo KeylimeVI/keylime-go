@@ -4,6 +4,7 @@ import (
 	"cmp"
 	"errors"
 	"fmt"
+	"reflect"
 )
 
 // Exported sentinel errors (preferred names)
@@ -121,4 +122,10 @@ func copyList[S ~[]T, T any](list S) S {
 	result := make(S, len(list))
 	copy(result, list)
 	return result
+}
+
+func isComparable[T any](value T) bool {
+	valueAny := any(value)
+	t := reflect.TypeOf(valueAny)
+	return t.Comparable()
 }
