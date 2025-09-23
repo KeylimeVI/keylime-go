@@ -27,10 +27,6 @@ func (l *List[T]) Add(vals ...T) *List[T] {
 	return l
 }
 
-func (l *List[T]) Added(vals ...T) List[T] {
-	return append(*l, vals...)
-}
-
 // Len returns the len of the list
 func (l *List[T]) Len() int {
 	return len(*l)
@@ -39,6 +35,13 @@ func (l *List[T]) Len() int {
 // Cap returns the capacity of the list
 func (l *List[T]) Cap() int {
 	return cap(*l)
+}
+
+// ToSlice converts the list to a native slice
+func (l *List[T]) ToSlice() []T {
+	slice := make([]T, len(*l))
+	copy(slice, *l)
+	return slice
 }
 
 // String returns the string representation of the list
@@ -97,19 +100,15 @@ func (l *List[T]) Remove(indices ...int) error {
 	return l.Remove(indicesList[1:]...)
 }
 
+// RemoveAny removes any items at the specified indices.
+// Supports method chaining
 func (l *List[T]) RemoveAny(indices ...int) *List[T] {
 	indicesList := formatIndicesReversed(indices)
-	indicesList = indicesList.Filtered(func(index int) bool {
+	indicesList.Filter(func(index int) bool {
 		return l.ValidIndex(index)
 	})
 	_ = l.Remove(indicesList...)
 	return l
-}
-
-func (l *List[T]) Removed(indices ...int) List[T] {
-	answer := l.Copy()
-	answer.RemoveAny(indices...)
-	return answer
 }
 
 // IsEmpty returns true if the list is empty
@@ -122,8 +121,8 @@ func (l *List[T]) ValidIndex(index int) bool {
 	return index >= 0 && index < len(*l)
 }
 
-// ValidIndexLoose checks if the index is within the list bounds, allows one index past the end
-func (l *List[T]) ValidIndexLoose(index int) bool {
+// validIndexLoose checks if the index is within the list bounds, allows one index past the end of the list
+func (l *List[T]) validIndexLoose(index int) bool {
 	return index >= 0 && index <= len(*l)
 }
 
@@ -133,8 +132,9 @@ func (l *List[T]) Clear() *List[T] {
 	return l
 }
 
-// Pop the last item in the list, or the item at i if specified, and return it
-// Returns an error if the index is out of bounds or if multiple indices are specified
+// Pop removes and returns the last item in the list, or the item at index i if specified.
+//
+// Errors: IndexError, EmptyListError, TooManyArgumentsError
 func (l *List[T]) Pop(i ...int) (T, error) {
 	var zero T
 	if len(i) > 1 {
@@ -155,7 +155,9 @@ func (l *List[T]) Pop(i ...int) (T, error) {
 	return (*l)[len(*l)-1], nil
 }
 
-// Reverse reverses the elements of the list in-place
+// Reverse reverses the order of the list
+//
+// Supports method chaining
 func (l *List[T]) Reverse() *List[T] {
 	if l.IsEmpty() || len(*l) <= 1 {
 		return l
@@ -168,13 +170,9 @@ func (l *List[T]) Reverse() *List[T] {
 	return l
 }
 
-func (l *List[T]) Reversed() List[T] {
-	answer := l.Copy()
-	answer.Reverse()
-	return answer
-}
-
-// Shuffle randomizes the order of elements in the list (in-place)
+// Shuffle randomizes the order of the list
+//
+// Supports method chaining
 func (l *List[T]) Shuffle() *List[T] {
 	if l.IsEmpty() || len(*l) <= 1 {
 		return l
@@ -187,15 +185,11 @@ func (l *List[T]) Shuffle() *List[T] {
 	return l
 }
 
-func (l *List[T]) Shuffled() List[T] {
-	answer := l.Copy()
-	answer.Shuffle()
-	return answer
-}
-
-// Insert inserts values at the specified index
+// Insert values at the specified index
+//
+// Errors: IndexError
 func (l *List[T]) Insert(index int, values ...T) error {
-	if !l.ValidIndexLoose(index) {
+	if !l.validIndexLoose(index) {
 		return NewIndexError(index, l.Len())
 	}
 	if index == len(*l) {
@@ -209,13 +203,9 @@ func (l *List[T]) Insert(index int, values ...T) error {
 	return nil
 }
 
-func (l *List[T]) Inserted(index int, values ...T) List[T] {
-	answer := l.Copy()
-	_ = answer.Insert(index, values...)
-	return answer
-}
-
-// Set replaces the element at the specified index
+// Set replaces the element at the specified index with value
+//
+// Errors: IndexError
 func (l *List[T]) Set(index int, value T) error {
 	if !l.ValidIndex(index) {
 		return NewIndexError(index, l.Len())
@@ -224,13 +214,9 @@ func (l *List[T]) Set(index int, value T) error {
 	return nil
 }
 
-func (l *List[T]) Setted(index int, value T) List[T] {
-	answer := l.Copy()
-	_ = answer.Set(index, value)
-	return answer
-}
-
-// Swap exchanges elements at two indices
+// Swap switches the elements at two indices
+//
+// Errors: IndexError
 func (l *List[T]) Swap(i, j int) error {
 	if !l.ValidIndex(i) {
 		return NewIndexError(i, l.Len())
@@ -242,13 +228,9 @@ func (l *List[T]) Swap(i, j int) error {
 	return nil
 }
 
-func (l *List[T]) Swapped(i, j int) List[T] {
-	answer := l.Copy()
-	_ = answer.Swap(i, j)
-	return answer
-}
-
 // Copy returns a new copy of the list
+//
+// Supports functional method chaining
 func (l *List[T]) Copy() List[T] {
 	c := make(List[T], len(*l))
 	copy(c, *l)
@@ -266,18 +248,14 @@ func (l *List[T]) Slice(start int, end int) List[T] {
 }
 
 func (l *List[T]) Filter(predicate func(T) bool) *List[T] {
-	*l = l.Filtered(predicate)
-	return l
-}
-
-func (l *List[T]) Filtered(predicate func(T) bool) List[T] {
-	result := NewList[T]()
-	for _, item := range *l {
-		if predicate(item) {
-			result = append(result, item)
+	toRemove := NewList[int]()
+	for index, item := range *l {
+		if !predicate(item) {
+			toRemove.Add(index)
 		}
 	}
-	return result
+	_ = l.Remove(toRemove...)
+	return l
 }
 
 func (l *List[T]) Map(f func(T) T) *List[T] {
@@ -287,10 +265,13 @@ func (l *List[T]) Map(f func(T) T) *List[T] {
 	return l
 }
 
-func (l *List[T]) Mapped(f func(T) T) List[T] {
-	result := l.Copy()
-	result.Map(f)
-	return result
+func (l *List[T]) FlatMap(f func(T) []T) *List[T] {
+	result := NewList[T]()
+	for _, item := range *l {
+		result.Add(f(item)...)
+	}
+	*l = result
+	return l
 }
 
 func (l *List[T]) Any(predicate func(T) bool) bool {
@@ -311,7 +292,7 @@ func (l *List[T]) All(predicate func(T) bool) bool {
 	return true
 }
 
-// Find returns the first item for which f returns true, or (T, false) if none match
+// Find returns the first item for which f returns true, or (zero, false) if none match
 func (l *List[T]) Find(predicate func(T) bool) (T, bool) {
 	for _, item := range *l {
 		if predicate(item) {
@@ -329,30 +310,48 @@ func (l *List[T]) ForEach(f func(T)) *List[T] {
 	return l
 }
 
-func (l *List[T]) Partition(size int) List[List[T]] {
+func (l *List[T]) Partition(size int) [][]T {
 	if size <= 0 {
-		// Return the whole list as one chunk
-		return List[List[T]]{l.Copy()}
+		return [][]T{l.Copy()}
 	}
 
-	var parts List[List[T]]
+	var parts [][]T
 	for i := 0; i < len(*l); i += size {
 		end := i + size
 		if end > len(*l) {
 			end = len(*l)
 		}
 
-		// Create a new part list
-		part := List[T]{}
+		var part []T
 		part = append(part, (*l)[i:end]...)
 		parts = append(parts, part)
 	}
 	return parts
 }
 
-// ToSlice converts the list to a native slice
-func (l *List[T]) ToSlice() []T {
-	slice := make([]T, len(*l))
-	copy(slice, *l)
-	return slice
+func (l *List[T]) EqualsFunc(other []T, f func(A, B T) bool) bool {
+	if len(*l) != len(other) {
+		return false
+	}
+	for i, item := range *l {
+		if !f(item, other[i]) {
+			return false
+		}
+	}
+	return true
+}
+
+func (l *List[T]) ContainsFunc(value T, f func(A, B T) bool) bool {
+	return l.Any(func(item T) bool {
+		return f(item, value)
+	})
+}
+
+func (l *List[T]) IndexOfFunc(predicate func(T) bool) (int, bool) {
+	for i, item := range *l {
+		if predicate(item) {
+			return i, true
+		}
+	}
+	return -1, false
 }

@@ -40,7 +40,7 @@ func Reduce[T any, U any, S ~[]T](slice S, initial U, reducer func(accumulator U
 	return result
 }
 
-func Flatten[T any, S ~[]T](collection []S) S {
+func Flatten[T any, S ~[]T, S2 ~[]S](collection S2) S {
 	totalLen := 0
 	for i := range collection {
 		totalLen += len(collection[i])
