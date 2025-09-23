@@ -137,9 +137,6 @@ func (l *List[T]) Clear() *List[T] {
 // Errors: IndexError, EmptyListError, TooManyArgumentsError
 func (l *List[T]) Pop(i ...int) (T, error) {
 	var zero T
-	if len(i) > 1 {
-		return zero, TooManyArgumentsError
-	}
 	if len(i) == 1 {
 		idx := i[0]
 		if !l.ValidIndex(idx) {
@@ -327,31 +324,4 @@ func (l *List[T]) Partition(size int) [][]T {
 		parts = append(parts, part)
 	}
 	return parts
-}
-
-func (l *List[T]) EqualsFunc(other []T, f func(A, B T) bool) bool {
-	if len(*l) != len(other) {
-		return false
-	}
-	for i, item := range *l {
-		if !f(item, other[i]) {
-			return false
-		}
-	}
-	return true
-}
-
-func (l *List[T]) ContainsFunc(value T, f func(A, B T) bool) bool {
-	return l.Any(func(item T) bool {
-		return f(item, value)
-	})
-}
-
-func (l *List[T]) IndexOfFunc(predicate func(T) bool) (int, bool) {
-	for i, item := range *l {
-		if predicate(item) {
-			return i, true
-		}
-	}
-	return -1, false
 }

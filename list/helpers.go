@@ -9,7 +9,6 @@ import (
 // Exported sentinel errors (preferred names)
 var (
 	EmptyListError        = errors.New("list is empty")
-	TooManyArgumentsError = errors.New("too many arguments for this method")
 	IndexOutOfBoundsError = errors.New("index out of bounds")
 )
 
