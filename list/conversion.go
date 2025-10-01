@@ -1,4 +1,4 @@
-package list
+package kl
 
 // ToSlice converts the list to a native slice
 func (l *List[T]) ToSlice() []T {
