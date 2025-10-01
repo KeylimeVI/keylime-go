@@ -118,6 +118,11 @@ func (l *List[T]) singleSet(index int, value T) bool {
 	return true
 }
 
+// validIndexLoose checks if the index is within the list bounds, allows one index past the end of the list
+func (l *List[T]) validIndexLoose(index int) bool {
+	return index >= 0 && index <= len(*l)
+}
+
 func copyList[S ~[]T, T any](list S) S {
 	result := make(S, len(list))
 	copy(result, list)

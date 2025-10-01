@@ -8,14 +8,14 @@ import (
 // List is a generic type alias of []T with useful methods and functions
 type List[T any] []T
 
-// NewList creates a new List with the specified values
-func NewList[T any](vals ...T) List[T] {
+// New creates a new List with the specified values
+func New[T any](vals ...T) List[T] {
 	list := List[T](vals)
 	return list
 }
 
-// NewListWithCapacity creates a new List with the specified capacity and values
-func NewListWithCapacity[T any](capacity int, vals ...T) List[T] {
+// NewWithCap creates a new List with the specified capacity and values
+func NewWithCap[T any](capacity int, vals ...T) List[T] {
 	list := make(List[T], 0, capacity)
 	list = append(list, vals...)
 	return list
@@ -30,18 +30,6 @@ func (l *List[T]) Add(vals ...T) *List[T] {
 // Len returns the len of the list
 func (l *List[T]) Len() int {
 	return len(*l)
-}
-
-// Cap returns the capacity of the list
-func (l *List[T]) Cap() int {
-	return cap(*l)
-}
-
-// ToSlice converts the list to a native slice
-func (l *List[T]) ToSlice() []T {
-	slice := make([]T, len(*l))
-	copy(slice, *l)
-	return slice
 }
 
 // String returns the string representation of the list
@@ -81,7 +69,7 @@ func (l *List[T]) Remove(indices ...int) error {
 		indices = formatIndicesReversed(indices)
 	}
 
-	indicesList := NewList[int](indices...)
+	indicesList := New[int](indices...)
 
 	if !indicesList.All(func(index int) bool {
 		return l.ValidIndex(index)
@@ -119,11 +107,6 @@ func (l *List[T]) IsEmpty() bool {
 // ValidIndex checks if the index is within the list bounds
 func (l *List[T]) ValidIndex(index int) bool {
 	return index >= 0 && index < len(*l)
-}
-
-// validIndexLoose checks if the index is within the list bounds, allows one index past the end of the list
-func (l *List[T]) validIndexLoose(index int) bool {
-	return index >= 0 && index <= len(*l)
 }
 
 // Clear the list
@@ -245,7 +228,7 @@ func (l *List[T]) Slice(start int, end int) List[T] {
 }
 
 func (l *List[T]) Filter(predicate func(T) bool) *List[T] {
-	toRemove := NewList[int]()
+	toRemove := New[int]()
 	for index, item := range *l {
 		if !predicate(item) {
 			toRemove.Add(index)
@@ -263,7 +246,7 @@ func (l *List[T]) Map(f func(T) T) *List[T] {
 }
 
 func (l *List[T]) FlatMap(f func(T) []T) *List[T] {
-	result := NewList[T]()
+	result := New[T]()
 	for _, item := range *l {
 		result.Add(f(item)...)
 	}

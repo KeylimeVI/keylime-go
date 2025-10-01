@@ -84,12 +84,6 @@ func Sort[T cmp.Ordered, S ~[]T](list *S) {
 	slices.Sort[S, T](*list)
 }
 
-func Sorted[T cmp.Ordered, S ~[]T](list S) S {
-	result := copyList(list)
-	Sort(&result)
-	return result
-}
-
 // IsSorted returns true if the list is sorted
 func IsSorted[T cmp.Ordered, S ~[]T](list S) bool {
 	if list == nil || len(list) <= 1 {
@@ -118,7 +112,7 @@ func Average[T RealNumber, S ~[]T](list S) float64 {
 	if len(list) == 0 {
 		return 0
 	}
-	floatList := NewListWithCapacity[float64](len(list))
+	floatList := NewWithCap[float64](len(list))
 	for _, item := range list {
 		floatList.Add(float64(item))
 	}
@@ -140,7 +134,7 @@ func BinarySearch[T cmp.Ordered, S ~[]T](slice S, value T) int {
 		return notFound
 	}
 	if !IsSorted(slice) {
-		sortedSlice := NewList[T](slice...)
+		sortedSlice := New[T](slice...)
 		Sort(&sortedSlice)
 		i, ok := slices.BinarySearch(sortedSlice, value)
 		if ok {
@@ -191,10 +185,4 @@ func RemoveDuplicates[T comparable, S ~[]T](list *S) {
 		result = append(result, item)
 	}
 	*list = result
-}
-
-func DuplicatesRemoved[T comparable, S ~[]T](list S) S {
-	result := copyList(list)
-	RemoveDuplicates(&result)
-	return result
 }

@@ -6,9 +6,9 @@ import (
 )
 
 func main() {
-	l := NewList(1, 2, 3)
-	s := NewList(1, 2, 3)
-	v := NewList(1, 2, 2)
+	l := New(1, 2, 3)
+	s := New(1, 2, 3)
+	v := New(1, 2, 2)
 	fmt.Println(l.Equals(s), l.Equals(v), l.Equals(l))
 	l.All(func(i int) bool {
 		return i == s[i]
