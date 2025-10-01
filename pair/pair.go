@@ -5,7 +5,7 @@ type Pair[A any, B any] struct {
 	B any
 }
 
-func NewPair[A any, B any](a A, b B) Pair[A, B] {
+func PairOf[A any, B any](a A, b B) Pair[A, B] {
 	return Pair[A, B]{A: a, B: b}
 }
 

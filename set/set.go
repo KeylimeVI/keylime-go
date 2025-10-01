@@ -3,13 +3,13 @@ package ks
 import (
 	"fmt"
 
-	list "github.com/KeylimeVI/keylime-go/list"
+	"github.com/KeylimeVI/keylime-go/list"
 )
 
 type Set[T comparable] map[T]struct{}
 
-// NewSet Constructor - returns Set value
-func NewSet[T comparable](items ...T) Set[T] {
+// SetOf Constructor - returns Set value
+func SetOf[T comparable](items ...T) Set[T] {
 	s := make(Set[T])
 	for _, item := range items {
 		s[item] = struct{}{}
@@ -81,8 +81,8 @@ func (s *Set[T]) ToSlice() []T {
 	return slice
 }
 
-func (s *Set[T]) ToList() list.List[T] {
-	return list.NewList[T](s.ToSlice()...)
+func (s *Set[T]) ToList() kl.List[T] {
+	return kl.ListOf[T](s.ToSlice()...)
 }
 
 // SubsetOf Check if this set is a subset of another set
@@ -106,7 +106,7 @@ func (s *Set[T]) SupersetOf(other *Set[T]) bool {
 
 // Union of two sets (returns Set value)
 func (s *Set[T]) Union(other *Set[T]) Set[T] {
-	result := NewSet[T]()
+	result := SetOf[T]()
 	for item := range *s {
 		result[item] = struct{}{}
 	}
@@ -118,7 +118,7 @@ func (s *Set[T]) Union(other *Set[T]) Set[T] {
 
 // Intersection of two sets (returns Set value)
 func (s *Set[T]) Intersection(other *Set[T]) Set[T] {
-	result := NewSet[T]()
+	result := SetOf[T]()
 	// Iterate over the smaller set for efficiency
 	if len(*s) < len(*other) {
 		for item := range *s {
@@ -146,7 +146,7 @@ func (s *Set[T]) Equals(other *Set[T]) bool {
 
 // Clone the set (returns Set value)
 func (s *Set[T]) Clone() Set[T] {
-	result := NewSet[T]()
+	result := SetOf[T]()
 	for item := range *s {
 		result[item] = struct{}{}
 	}
