@@ -8,8 +8,8 @@ import (
 // List is a generic type alias of []T with useful methods and functions
 type List[T any] []T
 
-// New creates a new List with the specified values
-func New[T any](vals ...T) List[T] {
+// NewList creates a new List with the specified values
+func NewList[T any](vals ...T) List[T] {
 	list := List[T](vals)
 	return list
 }
@@ -69,7 +69,7 @@ func (l *List[T]) Remove(indices ...int) error {
 		indices = formatIndicesReversed(indices)
 	}
 
-	indicesList := New[int](indices...)
+	indicesList := NewList[int](indices...)
 
 	if !indicesList.All(func(index int) bool {
 		return l.ValidIndex(index)
@@ -228,7 +228,7 @@ func (l *List[T]) Slice(start int, end int) List[T] {
 }
 
 func (l *List[T]) Filter(predicate func(T) bool) *List[T] {
-	toRemove := New[int]()
+	toRemove := NewList[int]()
 	for index, item := range *l {
 		if !predicate(item) {
 			toRemove.Add(index)
@@ -246,7 +246,7 @@ func (l *List[T]) Map(f func(T) T) *List[T] {
 }
 
 func (l *List[T]) FlatMap(f func(T) []T) *List[T] {
-	result := New[T]()
+	result := NewList[T]()
 	for _, item := range *l {
 		result.Add(f(item)...)
 	}

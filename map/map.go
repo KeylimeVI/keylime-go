@@ -1,14 +1,13 @@
 package km
 
 import (
-	"container/list"
-
-	"github.com/KeylimeVI/keylime-go/kl"
+	list "github.com/KeylimeVI/keylime-go/list"
+	kp "github.com/KeylimeVI/keylime-go/pair"
 )
 
 type Map[K comparable, V any] map[K]V
 
-func NewMap[K comparable, V any]() *Map[K, V] {
+func NewMap[K comparable, V any](pairs ...kp.NewPair) *Map[K, V] {
 	m := make(Map[K, V])
 	return &m
 }
@@ -67,7 +66,7 @@ func (m *Map[K, V]) Keys() []K {
 	return keys
 }
 
-func (m *Map[K, V]) ListKeys() kl.List[K] {
+func (m *Map[K, V]) ListKeys() list.List[K] {
 	return list.NewList[K](m.Keys()...)
 }
 
@@ -83,7 +82,7 @@ func (m *Map[K, V]) ListValues() list.List[V] {
 	return list.NewList[V](m.Values()...)
 }
 
-func (m *Map[K, V]) ToNativeMap() map[K]V {
+func (m *Map[K, V]) ToMap() map[K]V {
 	result := make(map[K]V, m.Len())
 	for k, v := range *m {
 		result[k] = v
@@ -116,7 +115,7 @@ func (m *Map[K, V]) Filter(predicate func(K, V) bool) *Map[K, V] {
 	return result
 }
 
-// Clone the map
-func (m *Map[K, V]) Clone() *Map[K, V] {
-	return NewMapFrom(m.ToNativeMap())
+// Copy the map
+func (m *Map[K, V]) Copy() *Map[K, V] {
+	return NewMapFrom(m.ToMap())
 }

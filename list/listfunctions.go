@@ -134,7 +134,7 @@ func BinarySearch[T cmp.Ordered, S ~[]T](slice S, value T) int {
 		return notFound
 	}
 	if !IsSorted(slice) {
-		sortedSlice := New[T](slice...)
+		sortedSlice := NewList[T](slice...)
 		Sort(&sortedSlice)
 		i, ok := slices.BinarySearch(sortedSlice, value)
 		if ok {
