@@ -81,7 +81,7 @@ func formatIndicesReversed(indices List[int]) List[int] {
 		return indices
 	}
 	RemoveDuplicates(&indices)
-	Sort[int, List[int]](&indices)
+	Sort[int, List[int]](indices)
 	indices.Reverse()
 	return indices
 }

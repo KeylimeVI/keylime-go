@@ -1,6 +1,7 @@
 package kl
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 )
@@ -208,26 +209,25 @@ func (l *List[T]) Swap(i, j int) error {
 	return nil
 }
 
-// Copy returns a new copy of the list
-//
-// Supports functional method chaining
+// Copy returns a new deep copy of the list
 func (l *List[T]) Copy() List[T] {
 	c := make(List[T], len(*l))
 	copy(c, *l)
 	return c
 }
 
-func (l *List[T]) Slice(start int, end int) List[T] {
+func (l *List[T]) Slice(start int, end int) (List[T], error) {
 	if start < 0 {
-		start = 0
+		return nil, NewIndexError(start, l.Len())
 	}
-	if end < l.Len() {
-		end = l.Len()
+	if end > l.Len() {
+		return nil, NewIndexError(end, l.Len())
 	}
 	if start > end {
-		return List[T]{}
+		return nil, errors.New("list.slice: start must be less than or equal to end")
 	}
-	return (*l)[start:end]
+	s := l.Copy()
+	return s[start:end], nil
 }
 
 func (l *List[T]) Filter(predicate func(T) bool) *List[T] {
@@ -275,15 +275,15 @@ func (l *List[T]) All(predicate func(T) bool) bool {
 	return true
 }
 
-// FindBy returns the first item for which f returns true, or (zero, false) if none match
-func (l *List[T]) FindBy(predicate func(T) bool) (T, bool) {
-	for _, item := range *l {
+// FindBy returns the first item for which f returns true: (item, index, ok)
+func (l *List[T]) FindBy(predicate func(T) bool) (T, int, bool) {
+	for i, item := range *l {
 		if predicate(item) {
-			return item, true
+			return item, i, true
 		}
 	}
 	var zero T
-	return zero, false
+	return zero, -1, false
 }
 
 func (l *List[T]) ForEach(f func(T)) *List[T] {

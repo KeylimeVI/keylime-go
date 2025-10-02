@@ -11,27 +11,6 @@ type RealNumber interface {
 		~float32 | ~float64
 }
 
-const notFound = -1
-
-// Contains returns true if the list contains the value
-func Contains[T comparable, S ~[]T](list S, values ...T) bool {
-	for _, value := range values {
-		if !singleContains(list, value) {
-			return false
-		}
-	}
-	return true
-}
-
-func ContainsAny[T comparable, S ~[]T](list S, values ...T) bool {
-	for _, value := range values {
-		if singleContains(list, value) {
-			return true
-		}
-	}
-	return false
-}
-
 func Reduce[T any, U any, S ~[]T](slice S, initial U, reducer func(accumulator U, value T) U) U {
 	result := initial
 	for _, item := range slice {
