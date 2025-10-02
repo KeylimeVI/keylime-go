@@ -1,8 +1,6 @@
 package ks
 
-import (
-	"fmt"
-)
+import "fmt"
 
 type Set[T comparable] map[T]struct{}
 
@@ -42,6 +40,15 @@ func (s *Set[T]) Remove(items ...T) {
 	}
 }
 
+func (s *Set[T]) Pop() (T, error) {
+	for item := range *s {
+		delete(*s, item)
+		return item, nil
+	}
+	var zero T
+	return zero, fmt.Errorf("pop: empty set")
+}
+
 // Contains checks if set contains all items
 func (s *Set[T]) Contains(items ...T) bool {
 	for _, item := range items {
@@ -72,6 +79,20 @@ func (s *Set[T]) Clear() {
 	for item := range *s {
 		delete(*s, item)
 	}
+}
+
+// Copy the set (returns Set value)
+func (s *Set[T]) Copy() Set[T] {
+	result := SetOf[T]()
+	for item := range *s {
+		result[item] = struct{}{}
+	}
+	return result
+}
+
+// String representation (for debugging)
+func (s *Set[T]) String() string {
+	return fmt.Sprintf("%v", s.ToSlice())
 }
 
 func (s *Set[T]) Equals(other Set[T]) bool {
@@ -147,16 +168,56 @@ func (s *Set[T]) Difference(other Set[T]) Set[T] {
 	return result
 }
 
-// Copy the set (returns Set value)
-func (s *Set[T]) Copy() Set[T] {
-	result := SetOf[T]()
+func (s *Set[T]) Filter(predicate func(T) bool) *Set[T] {
 	for item := range *s {
-		result[item] = struct{}{}
+		if !predicate(item) {
+			delete(*s, item)
+		}
 	}
-	return result
+	return s
 }
 
-// String representation (for debugging)
-func (s *Set[T]) String() string {
-	return fmt.Sprintf("%v", s.ToSlice())
+func (s *Set[T]) Map(f func(T) T) *Set[T] {
+	result := SetOf[T]()
+	for item := range *s {
+		applied := f(item)
+		result.Add(applied)
+	}
+	*s = result
+	return s
+}
+
+func (s *Set[T]) FlatMap(f func(T) []T) *Set[T] {
+	result := SetOf[T]()
+	for item := range *s {
+		applied := f(item)
+		result.Add(applied...)
+	}
+	*s = result
+	return s
+}
+
+func (s *Set[T]) ForEach(f func(T)) *Set[T] {
+	for item := range *s {
+		f(item)
+	}
+	return s
+}
+
+func (s *Set[T]) Any(predicate func(T) bool) bool {
+	for item := range *s {
+		if predicate(item) {
+			return true
+		}
+	}
+	return false
+}
+
+func (s *Set[T]) All(predicate func(T) bool) bool {
+	for item := range *s {
+		if !predicate(item) {
+			return false
+		}
+	}
+	return true
 }

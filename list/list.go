@@ -118,7 +118,7 @@ func (l *List[T]) Clear() *List[T] {
 
 // Pop removes and returns the last item in the list, or the item at index i if specified.
 //
-// Errors: IndexError, EmptyListError, TooManyArgumentsError
+// Errors: IndexError, EmptyListError
 func (l *List[T]) Pop(i ...int) (T, error) {
 	var zero T
 	if len(i) == 1 {
@@ -257,6 +257,13 @@ func (l *List[T]) FlatMap(f func(T) []T) *List[T] {
 	return l
 }
 
+func (l *List[T]) ForEach(f func(T)) *List[T] {
+	for _, item := range *l {
+		f(item)
+	}
+	return l
+}
+
 func (l *List[T]) Any(predicate func(T) bool) bool {
 	for _, item := range *l {
 		if predicate(item) {
@@ -284,13 +291,6 @@ func (l *List[T]) FindBy(predicate func(T) bool) (T, int, bool) {
 	}
 	var zero T
 	return zero, -1, false
-}
-
-func (l *List[T]) ForEach(f func(T)) *List[T] {
-	for _, item := range *l {
-		f(item)
-	}
-	return l
 }
 
 func (l *List[T]) Partition(size int) [][]T {

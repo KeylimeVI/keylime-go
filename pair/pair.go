@@ -1,5 +1,7 @@
 package kp
 
+import kl "github.com/KeylimeVI/keylime-go/list"
+
 // Pair is a generic type that holds two values
 type Pair[A any, B any] struct {
 	A any
@@ -21,6 +23,15 @@ func PairsToMap[K comparable, V any, S ~[]Pair[K, V]](slice S) map[K]V {
 	for _, pair := range slice {
 		k, v := pair.Unwrap()
 		result[k] = v
+	}
+	return result
+}
+
+func MapToPairs[K comparable, V any](m map[K]V) kl.List[Pair[K, V]] {
+	result := kl.ListOf[Pair[K, V]]()
+	for k, v := range m {
+		p := PairOf(k, v)
+		result.Add(p)
 	}
 	return result
 }
