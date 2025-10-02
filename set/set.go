@@ -2,8 +2,6 @@ package ks
 
 import (
 	"fmt"
-
-	"github.com/KeylimeVI/keylime-go/list"
 )
 
 type Set[T comparable] map[T]struct{}
@@ -17,7 +15,7 @@ func SetOf[T comparable](items ...T) Set[T] {
 	return s
 }
 
-func NewSetWithCapacity[T comparable](capacity int, items ...T) Set[T] {
+func SetWithCap[T comparable](capacity int, items ...T) Set[T] {
 	s := make(Set[T], capacity)
 	for _, item := range items {
 		s[item] = struct{}{}
@@ -44,20 +42,24 @@ func (s *Set[T]) Remove(items ...T) {
 	}
 }
 
-// Contains Check if set contains item
-func (s *Set[T]) Contains(item T) bool {
-	_, exists := (*s)[item]
-	return exists
-}
-
-// ContainsAll Check if set contains all items
-func (s *Set[T]) ContainsAll(items ...T) bool {
+// Contains checks if set contains all items
+func (s *Set[T]) Contains(items ...T) bool {
 	for _, item := range items {
-		if !s.Contains(item) {
+		if !s.singleContains(item) {
 			return false
 		}
 	}
 	return true
+}
+
+// ContainsAny checks if set contains at least one item from items
+func (s *Set[T]) ContainsAny(items ...T) bool {
+	for _, item := range items {
+		if s.singleContains(item) {
+			return true
+		}
+	}
+	return false
 }
 
 // Len Get size of set
@@ -72,27 +74,21 @@ func (s *Set[T]) Clear() {
 	}
 }
 
-// ToSlice Convert to slice
-func (s *Set[T]) ToSlice() []T {
-	slice := make([]T, 0, len(*s))
-	for item := range *s {
-		slice = append(slice, item)
+func (s *Set[T]) Equals(other Set[T]) bool {
+	if len(*s) != len(other) {
+		return false
 	}
-	return slice
-}
-
-func (s *Set[T]) ToList() kl.List[T] {
-	return kl.ListOf[T](s.ToSlice()...)
+	return s.SupersetOf(other) && s.SubsetOf(other)
 }
 
 // SubsetOf Check if this set is a subset of another set
-func (s *Set[T]) SubsetOf(other *Set[T]) bool {
+func (s *Set[T]) SubsetOf(other Set[T]) bool {
 	if s.IsEmpty() {
 		return true // Empty set is subset of any set
 	}
 
 	for item := range *s {
-		if !other.Contains(item) {
+		if !other.singleContains(item) {
 			return false
 		}
 	}
@@ -100,35 +96,35 @@ func (s *Set[T]) SubsetOf(other *Set[T]) bool {
 }
 
 // SupersetOf Check if this set is a superset of another set
-func (s *Set[T]) SupersetOf(other *Set[T]) bool {
-	return other.SubsetOf(s)
+func (s *Set[T]) SupersetOf(other Set[T]) bool {
+	return other.SubsetOf(*s)
 }
 
-// Union of two sets (returns Set value)
-func (s *Set[T]) Union(other *Set[T]) Set[T] {
+// Union of two sets
+func (s *Set[T]) Union(other Set[T]) Set[T] {
 	result := SetOf[T]()
 	for item := range *s {
 		result[item] = struct{}{}
 	}
-	for item := range *other {
+	for item := range other {
 		result[item] = struct{}{}
 	}
 	return result
 }
 
-// Intersection of two sets (returns Set value)
-func (s *Set[T]) Intersection(other *Set[T]) Set[T] {
+// Intersection of two sets
+func (s *Set[T]) Intersection(other Set[T]) Set[T] {
 	result := SetOf[T]()
 	// Iterate over the smaller set for efficiency
-	if len(*s) < len(*other) {
+	if len(*s) < len(other) {
 		for item := range *s {
-			if other.Contains(item) {
+			if other.singleContains(item) {
 				result[item] = struct{}{}
 			}
 		}
 	} else {
-		for item := range *other {
-			if s.Contains(item) {
+		for item := range other {
+			if s.singleContains(item) {
 				result[item] = struct{}{}
 			}
 		}
@@ -136,16 +132,23 @@ func (s *Set[T]) Intersection(other *Set[T]) Set[T] {
 	return result
 }
 
-// Equals Check if two sets are equal
-func (s *Set[T]) Equals(other *Set[T]) bool {
-	if len(*s) != len(*other) {
-		return false
+func (s *Set[T]) Difference(other Set[T]) Set[T] {
+	result := SetOf[T]()
+	for item := range *s {
+		if !other.singleContains(item) {
+			result.Add(item)
+		}
 	}
-	return s.SubsetOf(other)
+	for item := range other {
+		if !s.singleContains(item) {
+			result.Add(item)
+		}
+	}
+	return result
 }
 
-// Clone the set (returns Set value)
-func (s *Set[T]) Clone() Set[T] {
+// Copy the set (returns Set value)
+func (s *Set[T]) Copy() Set[T] {
 	result := SetOf[T]()
 	for item := range *s {
 		result[item] = struct{}{}

@@ -14,8 +14,8 @@ func ListOf[T any](vals ...T) List[T] {
 	return list
 }
 
-// NewWithCap creates a new List with the specified capacity and values
-func NewWithCap[T any](capacity int, vals ...T) List[T] {
+// ListWithCap creates a new List with the specified capacity and values
+func ListWithCap[T any](capacity int, vals ...T) List[T] {
 	list := make(List[T], 0, capacity)
 	list = append(list, vals...)
 	return list
@@ -224,6 +224,9 @@ func (l *List[T]) Slice(start int, end int) List[T] {
 	if end < l.Len() {
 		end = l.Len()
 	}
+	if start > end {
+		return List[T]{}
+	}
 	return (*l)[start:end]
 }
 
@@ -272,8 +275,8 @@ func (l *List[T]) All(predicate func(T) bool) bool {
 	return true
 }
 
-// Find returns the first item for which f returns true, or (zero, false) if none match
-func (l *List[T]) Find(predicate func(T) bool) (T, bool) {
+// FindBy returns the first item for which f returns true, or (zero, false) if none match
+func (l *List[T]) FindBy(predicate func(T) bool) (T, bool) {
 	for _, item := range *l {
 		if predicate(item) {
 			return item, true
