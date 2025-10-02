@@ -21,23 +21,25 @@ func SetWithCap[T comparable](capacity int, items ...T) Set[T] {
 	return s
 }
 
+// Add values to set
+func (s *Set[T]) Add(values ...T) *Set[T] {
+	for _, item := range values {
+		(*s)[item] = struct{}{}
+	}
+	return s
+}
+
 // IsEmpty Check if set is empty
 func (s *Set[T]) IsEmpty() bool {
 	return len(*s) == 0
 }
 
-// Add items to set
-func (s *Set[T]) Add(items ...T) {
-	for _, item := range items {
-		(*s)[item] = struct{}{}
-	}
-}
-
 // Remove items from set
-func (s *Set[T]) Remove(items ...T) {
+func (s *Set[T]) Remove(items ...T) *Set[T] {
 	for _, item := range items {
 		delete(*s, item)
 	}
+	return s
 }
 
 func (s *Set[T]) Pop() (T, error) {
@@ -75,10 +77,11 @@ func (s *Set[T]) Len() int {
 }
 
 // Clear all items from set
-func (s *Set[T]) Clear() {
+func (s *Set[T]) Clear() *Set[T] {
 	for item := range *s {
 		delete(*s, item)
 	}
+	return s
 }
 
 // Copy the set (returns Set value)
