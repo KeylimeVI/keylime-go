@@ -2,12 +2,13 @@ package kl
 
 import "reflect"
 
-func (l *List[T]) Contains(values ...T) bool {
+// Contains returns true if the list contains all of the provided items.
+func (l *List[T]) Contains(items ...T) bool {
 	if l.IsEmpty() {
-		return len(values) == 0
+		return len(items) == 0
 	}
 
-	for _, value := range values {
+	for _, value := range items {
 		if !l.singleContains(value) {
 			return false
 		}
@@ -15,12 +16,13 @@ func (l *List[T]) Contains(values ...T) bool {
 	return true
 }
 
-func (l *List[T]) ContainsAny(values ...T) bool {
+// ContainsAny returns true if the list contains at least one of the provided items.
+func (l *List[T]) ContainsAny(items ...T) bool {
 	if l.IsEmpty() {
 		return false
 	}
 
-	for _, value := range values {
+	for _, value := range items {
 		if l.singleContains(value) {
 			return true
 		}
@@ -57,12 +59,13 @@ func (l *List[T]) Equals(other List[T], optionalComparator ...func(T, T) bool) b
 	}
 }
 
-func (l *List[T]) IndexOf(value T) (int, bool) {
+// IndexOf returns the index of the first occurrence of item and true; otherwise (-1, false).
+func (l *List[T]) IndexOf(item T) (int, bool) {
 	if l.IsEmpty() {
 		return -1, false
 	}
-	if isComparable(value) {
-		valueAny := any(value)
+	if isComparable(item) {
+		valueAny := any(item)
 		for index, item := range *l {
 			anyItem := any(item)
 			if anyItem == valueAny {
@@ -72,7 +75,7 @@ func (l *List[T]) IndexOf(value T) (int, bool) {
 		return -1, false
 	}
 	for index, item := range *l {
-		if reflect.DeepEqual(item, value) {
+		if reflect.DeepEqual(item, item) {
 			return index, true
 		}
 	}
@@ -91,22 +94,22 @@ func (l *List[T]) equalsFunc(other []T, f func(T, T) bool) bool {
 	return true
 }
 
-func (l *List[T]) singleContains(value T) bool {
+func (l *List[T]) singleContains(item T) bool {
 	if l.IsEmpty() {
 		return false
 	}
-	valueAny := any(value)
-	if isComparable(value) {
-		for _, item := range *l {
-			itemAny := any(item)
+	valueAny := any(item)
+	if isComparable(item) {
+		for _, val := range *l {
+			itemAny := any(val)
 			if itemAny == valueAny {
 				return true
 			}
 		}
 		return false
 	} else {
-		return l.Any(func(item T) bool {
-			return reflect.DeepEqual(item, value)
+		return l.Any(func(val T) bool {
+			return reflect.DeepEqual(val, item)
 		})
 	}
 }

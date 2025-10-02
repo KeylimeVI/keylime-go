@@ -11,42 +11,46 @@ type RealNumber interface {
 		~float32 | ~float64
 }
 
-func Reduce[T any, U any, S ~[]T](slice S, initial U, reducer func(accumulator U, value T) U) U {
+// Reduce applies a reducer function over the slice-like list, starting at initial, and returns the accumulated result.
+func Reduce[T any, U any, S ~[]T](list S, initial U, reducer func(accumulator U, value T) U) U {
 	result := initial
-	for _, item := range slice {
+	for _, item := range list {
 		result = reducer(result, item)
 	}
 	return result
 }
 
-func Flatten[T any, S ~[]T, S2 ~[]S](collection S2) S {
+// Flatten concatenates a slice of slices into a single slice.
+func Flatten[T any, S ~[]T, S2 ~[]S](list S2) S {
 	totalLen := 0
-	for i := range collection {
-		totalLen += len(collection[i])
+	for i := range list {
+		totalLen += len(list[i])
 	}
 
 	result := make(S, 0, totalLen)
-	for i := range collection {
-		result = append(result, collection[i]...)
+	for i := range list {
+		result = append(result, list[i]...)
 	}
 
 	return result
 }
 
-func FlatMap[T1 any, T2 any, S1 ~[]T1, S2 ~[]T2](collection S1, iteratee func(item T1) S2) S2 {
-	result := make(S2, 0, len(collection))
+// FlatMap maps each element to a slice and concatenates the results.
+func FlatMap[T1 any, T2 any, S1 ~[]T1, S2 ~[]T2](list S1, iteratee func(item T1) S2) S2 {
+	result := make(S2, 0, len(list))
 
-	for i := range collection {
-		result = append(result, iteratee(collection[i])...)
+	for i := range list {
+		result = append(result, iteratee(list[i])...)
 	}
 	return result
 }
 
-func Map[T1 any, T2 any, S1 ~[]T1, S2 ~[]T2](collection S1, iteratee func(item T1) T2) S2 {
-	result := make(S2, len(collection))
+// Map transforms a slice of T1 into a slice of T2 using iteratee.
+func Map[T1 any, T2 any, S1 ~[]T1, S2 ~[]T2](list S1, iteratee func(item T1) T2) S2 {
+	result := make(S2, len(list))
 
-	for i := range collection {
-		result[i] = iteratee(collection[i])
+	for i := range list {
+		result[i] = iteratee(list[i])
 	}
 
 	return result
@@ -71,14 +75,17 @@ func IsSorted[T cmp.Ordered, S ~[]T](list S) bool {
 	return slices.IsSorted[S, T](list)
 }
 
+// Min returns the smallest element of the slice.
 func Min[T cmp.Ordered, S ~[]T](list S) T {
 	return slices.Min(list)
 }
 
+// Max returns the largest element of the slice.
 func Max[T cmp.Ordered, S ~[]T](list S) T {
 	return slices.Max(list)
 }
 
+// Sum adds up all elements in the slice and returns the total.
 func Sum[T cmp.Ordered, S ~[]T](list S) T {
 	var s T
 	for _, item := range list {
@@ -87,6 +94,7 @@ func Sum[T cmp.Ordered, S ~[]T](list S) T {
 	return s
 }
 
+// RemoveDuplicates removes duplicate values from the slice in place, preserving the first occurrence.
 func RemoveDuplicates[T comparable, S ~[]T](list *S) {
 	if len(*list) <= 1 {
 		return

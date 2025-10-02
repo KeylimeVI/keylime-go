@@ -10,21 +10,21 @@ import (
 type List[T any] []T
 
 // ListOf creates a new List with the specified values
-func ListOf[T any](vals ...T) List[T] {
-	list := List[T](vals)
+func ListOf[T any](items ...T) List[T] {
+	list := List[T](items)
 	return list
 }
 
 // ListWithCap creates a new List with the specified capacity and values
-func ListWithCap[T any](capacity int, vals ...T) List[T] {
+func ListWithCap[T any](capacity int, items ...T) List[T] {
 	list := make(List[T], 0, capacity)
-	list = append(list, vals...)
+	list = append(list, items...)
 	return list
 }
 
-// Add vals to the end of the list
-func (l *List[T]) Add(vals ...T) *List[T] {
-	*l = append(*l, vals...)
+// Add items to the end of the list
+func (l *List[T]) Add(items ...T) *List[T] {
+	*l = append(*l, items...)
 	return l
 }
 
@@ -216,6 +216,8 @@ func (l *List[T]) Copy() List[T] {
 	return c
 }
 
+// Slice returns a sublist from start (inclusive) to end (exclusive).
+// Errors: IndexError if bounds are invalid.
 func (l *List[T]) Slice(start int, end int) (List[T], error) {
 	if start < 0 {
 		return nil, NewIndexError(start, l.Len())
@@ -230,6 +232,7 @@ func (l *List[T]) Slice(start int, end int) (List[T], error) {
 	return s[start:end], nil
 }
 
+// Filter keeps elements for which predicate returns true. Supports method chaining.
 func (l *List[T]) Filter(predicate func(T) bool) *List[T] {
 	toRemove := ListOf[int]()
 	for index, item := range *l {
@@ -241,6 +244,7 @@ func (l *List[T]) Filter(predicate func(T) bool) *List[T] {
 	return l
 }
 
+// Map applies f to each element in place. Supports method chaining.
 func (l *List[T]) Map(f func(T) T) *List[T] {
 	for i, item := range *l {
 		(*l)[i] = f(item)
@@ -248,6 +252,8 @@ func (l *List[T]) Map(f func(T) T) *List[T] {
 	return l
 }
 
+// FlatMap maps each element to a slice and replaces the list with the concatenated result.
+// Supports method chaining.
 func (l *List[T]) FlatMap(f func(T) []T) *List[T] {
 	result := ListOf[T]()
 	for _, item := range *l {
@@ -257,6 +263,7 @@ func (l *List[T]) FlatMap(f func(T) []T) *List[T] {
 	return l
 }
 
+// ForEach calls f for each element in the list. Supports method chaining.
 func (l *List[T]) ForEach(f func(T)) *List[T] {
 	for _, item := range *l {
 		f(item)
@@ -264,6 +271,7 @@ func (l *List[T]) ForEach(f func(T)) *List[T] {
 	return l
 }
 
+// Any returns true if predicate returns true for any element.
 func (l *List[T]) Any(predicate func(T) bool) bool {
 	for _, item := range *l {
 		if predicate(item) {
@@ -273,6 +281,7 @@ func (l *List[T]) Any(predicate func(T) bool) bool {
 	return false
 }
 
+// All returns true if predicate returns true for every element.
 func (l *List[T]) All(predicate func(T) bool) bool {
 	for _, item := range *l {
 		if !predicate(item) {
@@ -293,6 +302,8 @@ func (l *List[T]) FindBy(predicate func(T) bool) (T, int, bool) {
 	return zero, -1, false
 }
 
+// Partition splits the list into a slice of chunks of the given size.
+// If size <= 0, returns a single chunk copy of the list.
 func (l *List[T]) Partition(size int) [][]T {
 	if size <= 0 {
 		return [][]T{l.Copy()}

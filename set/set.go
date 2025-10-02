@@ -2,6 +2,7 @@ package ks
 
 import "fmt"
 
+// Set is a generic set of comparable elements implemented as a map[T]struct{}.
 type Set[T comparable] map[T]struct{}
 
 // SetOf Constructor - returns Set value
@@ -13,6 +14,7 @@ func SetOf[T comparable](items ...T) Set[T] {
 	return s
 }
 
+// SetWithCap creates a set with the given initial capacity and optional items.
 func SetWithCap[T comparable](capacity int, items ...T) Set[T] {
 	s := make(Set[T], capacity)
 	for _, item := range items {
@@ -22,8 +24,8 @@ func SetWithCap[T comparable](capacity int, items ...T) Set[T] {
 }
 
 // Add values to set
-func (s *Set[T]) Add(values ...T) *Set[T] {
-	for _, item := range values {
+func (s *Set[T]) Add(items ...T) *Set[T] {
+	for _, item := range items {
 		(*s)[item] = struct{}{}
 	}
 	return s
@@ -42,6 +44,8 @@ func (s *Set[T]) Remove(items ...T) *Set[T] {
 	return s
 }
 
+// Pop removes and returns an arbitrary element from the set.
+// Returns an error if the set is empty.
 func (s *Set[T]) Pop() (T, error) {
 	for item := range *s {
 		delete(*s, item)
@@ -98,6 +102,7 @@ func (s *Set[T]) String() string {
 	return fmt.Sprintf("%v", s.ToSlice())
 }
 
+// Equals returns true if both sets contain exactly the same elements.
 func (s *Set[T]) Equals(other Set[T]) bool {
 	if len(*s) != len(other) {
 		return false
@@ -156,6 +161,7 @@ func (s *Set[T]) Intersection(other Set[T]) Set[T] {
 	return result
 }
 
+// Difference returns a set of elements that are in either s or other but not both.
 func (s *Set[T]) Difference(other Set[T]) Set[T] {
 	result := SetOf[T]()
 	for item := range *s {
@@ -171,6 +177,7 @@ func (s *Set[T]) Difference(other Set[T]) Set[T] {
 	return result
 }
 
+// Filter removes elements for which predicate returns false. Supports method chaining.
 func (s *Set[T]) Filter(predicate func(T) bool) *Set[T] {
 	for item := range *s {
 		if !predicate(item) {

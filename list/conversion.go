@@ -7,6 +7,7 @@ func (l *List[T]) ToSlice() []T {
 	return slice
 }
 
+// ToMap converts the list to a map where the key is the index and the value is the element.
 func (l *List[T]) ToMap() map[int]T {
 	result := map[int]T{}
 	for index, item := range *l {
