@@ -259,7 +259,7 @@ func (l *List[T]) Slice(start int, end int) (List[T], error) {
 //
 // Supports method chaining
 func (l *List[T]) Grow(amount int) *List[T] {
-	newList := ListWithCap[T](amount+l.Cap(), *l...)
+	newList := NewListWithCap[T](amount+l.Cap(), *l...)
 	*l = newList
 	return l
 }
