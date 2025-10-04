@@ -99,7 +99,7 @@ func RemoveDuplicates[T comparable, S ~[]T](list *S) {
 	if len(*list) <= 1 {
 		return
 	}
-	result := ListOf[T]()
+	result := NewList[T]()
 	for _, v := range *list {
 		if !result.singleContains(v) {
 			result.Add(v)

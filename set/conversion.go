@@ -13,5 +13,5 @@ func (s *Set[T]) ToSlice() []T {
 
 // ToList converts the set to a list
 func (s *Set[T]) ToList() kl.List[T] {
-	return kl.ListOf[T](s.ToSlice()...)
+	return kl.NewList[T](s.ToSlice()...)
 }

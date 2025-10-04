@@ -9,14 +9,14 @@ import (
 // List is a generic type alias of []T with useful methods and functions
 type List[T any] []T
 
-// ListOf creates a new List with the specified values
-func ListOf[T any](items ...T) List[T] {
+// NewList creates a new List with the specified values
+func NewList[T any](items ...T) List[T] {
 	list := List[T](items)
 	return list
 }
 
-// ListWithCap creates a new List with the specified capacity and values
-func ListWithCap[T any](capacity int, items ...T) List[T] {
+// NewListWithCap creates a new List with the specified capacity and values
+func NewListWithCap[T any](capacity int, items ...T) List[T] {
 	list := make(List[T], 0, capacity)
 	list = append(list, items...)
 	return list
@@ -39,16 +39,22 @@ func (l *List[T]) String() string {
 }
 
 // Get the item at index i, or false if the index is out of bounds
-func (l *List[T]) Get(i int) (T, bool) {
+func (l *List[T]) Get(i ...int) (T, bool) {
 	if l.IsEmpty() {
 		var zero T
 		return zero, false
 	}
-	if !l.ValidIndex(i) {
+	index := 0
+	if len(i) == 0 {
+		index = l.Len() - 1
+	} else {
+		index = i[0]
+	}
+	if !l.ValidIndex(index) {
 		var zero T
 		return zero, false
 	}
-	return (*l)[i], true
+	return (*l)[index], true
 }
 
 // Remove the items at indices, gives up and returns an error if any of the indices are out of bounds
@@ -70,7 +76,7 @@ func (l *List[T]) Remove(indices ...int) error {
 		indices = formatIndicesReversed(indices)
 	}
 
-	indicesList := ListOf[int](indices...)
+	indicesList := NewList[int](indices...)
 
 	if !indicesList.All(func(index int) bool {
 		return l.ValidIndex(index)
@@ -119,21 +125,24 @@ func (l *List[T]) Clear() *List[T] {
 // Pop removes and returns the last item in the list, or the item at index i if specified.
 //
 // Errors: IndexError, EmptyListError
-func (l *List[T]) Pop(i ...int) (T, error) {
-	var zero T
-	if len(i) == 1 {
-		idx := i[0]
-		if !l.ValidIndex(idx) {
-			return zero, NewIndexError(idx, l.Len())
-		}
-		item := (*l)[idx]
-		return item, nil
-	}
-	// No index provided: emptiness is the only precondition here
+func (l *List[T]) Pop(i ...int) (T, bool) {
 	if l.IsEmpty() {
-		return zero, EmptyListError
+		var zero T
+		return zero, false
 	}
-	return (*l)[len(*l)-1], nil
+	index := 0
+	if len(i) == 0 {
+		index = l.Len() - 1
+	} else {
+		index = i[0]
+	}
+	if !l.ValidIndex(index) {
+		var zero T
+		return zero, false
+	}
+	result := (*l)[index]
+	*l = append((*l)[:index], (*l)[index+1:]...)
+	return result, true
 }
 
 // Reverse reverses the order of the list
@@ -234,7 +243,7 @@ func (l *List[T]) Slice(start int, end int) (List[T], error) {
 
 // Filter keeps elements for which predicate returns true. Supports method chaining.
 func (l *List[T]) Filter(predicate func(T) bool) *List[T] {
-	toRemove := ListOf[int]()
+	toRemove := NewList[int]()
 	for index, item := range *l {
 		if !predicate(item) {
 			toRemove.Add(index)
@@ -255,7 +264,7 @@ func (l *List[T]) Map(f func(T) T) *List[T] {
 // FlatMap maps each element to a slice and replaces the list with the concatenated result.
 // Supports method chaining.
 func (l *List[T]) FlatMap(f func(T) []T) *List[T] {
-	result := ListOf[T]()
+	result := NewList[T]()
 	for _, item := range *l {
 		result.Add(f(item)...)
 	}

@@ -1,12 +1,14 @@
 package ks
 
-import "fmt"
+import (
+	"fmt"
+)
 
 // Set is a generic set of comparable elements implemented as a map[T]struct{}.
 type Set[T comparable] map[T]struct{}
 
-// SetOf Constructor - returns Set value
-func SetOf[T comparable](items ...T) Set[T] {
+// NewSet Constructor - returns Set value
+func NewSet[T comparable](items ...T) Set[T] {
 	s := make(Set[T])
 	for _, item := range items {
 		s[item] = struct{}{}
@@ -14,8 +16,8 @@ func SetOf[T comparable](items ...T) Set[T] {
 	return s
 }
 
-// SetWithCap creates a set with the given initial capacity and optional items.
-func SetWithCap[T comparable](capacity int, items ...T) Set[T] {
+// NewSetWithCap creates a set with the given initial capacity and optional items.
+func NewSetWithCap[T comparable](capacity int, items ...T) Set[T] {
 	s := make(Set[T], capacity)
 	for _, item := range items {
 		s[item] = struct{}{}
@@ -90,7 +92,7 @@ func (s *Set[T]) Clear() *Set[T] {
 
 // Copy the set (returns Set value)
 func (s *Set[T]) Copy() Set[T] {
-	result := SetOf[T]()
+	result := NewSet[T]()
 	for item := range *s {
 		result[item] = struct{}{}
 	}
@@ -129,41 +131,31 @@ func (s *Set[T]) SupersetOf(other Set[T]) bool {
 	return other.SubsetOf(*s)
 }
 
-// Union of two sets
-func (s *Set[T]) Union(other Set[T]) Set[T] {
-	result := SetOf[T]()
-	for item := range *s {
-		result[item] = struct{}{}
-	}
-	for item := range other {
-		result[item] = struct{}{}
-	}
+// Union returns the union of multiple sets
+func (s *Set[T]) Union(others ...Set[T]) Set[T] {
+	result := s.Copy()
+	flattened := Flatten(others)
+	result.Add(flattened.ToList()...)
 	return result
 }
 
-// Intersection of two sets
-func (s *Set[T]) Intersection(other Set[T]) Set[T] {
-	result := SetOf[T]()
-	// Iterate over the smaller set for efficiency
-	if len(*s) < len(other) {
-		for item := range *s {
-			if other.singleContains(item) {
-				result[item] = struct{}{}
+// Intersection returns the intersection of multiple sets
+func (s *Set[T]) Intersection(others ...Set[T]) Set[T] {
+	result := s.Copy()
+	result.Filter(func(item T) bool {
+		for _, other := range others {
+			if !other.Contains(item) {
+				return false
 			}
 		}
-	} else {
-		for item := range other {
-			if s.singleContains(item) {
-				result[item] = struct{}{}
-			}
-		}
-	}
+		return true
+	})
 	return result
 }
 
 // Difference returns a set of elements that are in either s or other but not both.
 func (s *Set[T]) Difference(other Set[T]) Set[T] {
-	result := SetOf[T]()
+	result := NewSet[T]()
 	for item := range *s {
 		if !other.singleContains(item) {
 			result.Add(item)
@@ -188,7 +180,7 @@ func (s *Set[T]) Filter(predicate func(T) bool) *Set[T] {
 }
 
 func (s *Set[T]) Map(f func(T) T) *Set[T] {
-	result := SetOf[T]()
+	result := NewSet[T]()
 	for item := range *s {
 		applied := f(item)
 		result.Add(applied)
@@ -198,7 +190,7 @@ func (s *Set[T]) Map(f func(T) T) *Set[T] {
 }
 
 func (s *Set[T]) FlatMap(f func(T) []T) *Set[T] {
-	result := SetOf[T]()
+	result := NewSet[T]()
 	for item := range *s {
 		applied := f(item)
 		result.Add(applied...)

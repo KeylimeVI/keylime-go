@@ -8,8 +8,8 @@ type Pair[A any, B any] struct {
 	B any
 }
 
-// PairOf creates a new pair of two values
-func PairOf[A any, B any](a A, b B) Pair[A, B] {
+// NewPair creates a new pair of two values
+func NewPair[A any, B any](a A, b B) Pair[A, B] {
 	return Pair[A, B]{A: a, B: b}
 }
 
@@ -28,9 +28,9 @@ func PairsToMap[K comparable, V any, S ~[]Pair[K, V]](slice S) map[K]V {
 }
 
 func MapToPairs[K comparable, V any](m map[K]V) kl.List[Pair[K, V]] {
-	result := kl.ListOf[Pair[K, V]]()
+	result := kl.NewList[Pair[K, V]]()
 	for k, v := range m {
-		p := PairOf(k, v)
+		p := NewPair(k, v)
 		result.Add(p)
 	}
 	return result
