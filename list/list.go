@@ -33,6 +33,11 @@ func (l *List[T]) Len() int {
 	return len(*l)
 }
 
+// Cap returns the capacity of the list
+func (l *List[T]) Cap() int {
+	return cap(*l)
+}
+
 // String returns the string representation of the list
 func (l *List[T]) String() string {
 	return fmt.Sprintf("%v", *l)
@@ -145,6 +150,15 @@ func (l *List[T]) Pop(i ...int) (T, bool) {
 	return result, true
 }
 
+// Concatenate concatenates the inputs to the list
+//
+// Supports method chaining
+func (l *List[T]) Concatenate(lists ...List[T]) *List[T] {
+	toConcatenate := Flatten[T, List[T], []List[T]](lists)
+	*l = append(*l, toConcatenate...)
+	return l
+}
+
 // Reverse reverses the order of the list
 //
 // Supports method chaining
@@ -239,6 +253,15 @@ func (l *List[T]) Slice(start int, end int) (List[T], error) {
 	}
 	s := l.Copy()
 	return s[start:end], nil
+}
+
+// Grow increases the list's capacity by amount
+//
+// Supports method chaining
+func (l *List[T]) Grow(amount int) *List[T] {
+	newList := ListWithCap[T](amount+l.Cap(), *l...)
+	*l = newList
+	return l
 }
 
 // Filter keeps elements for which predicate returns true. Supports method chaining.
