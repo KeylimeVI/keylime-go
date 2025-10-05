@@ -12,10 +12,6 @@ func NewList[T any](items ...T) List[T] {
 	return kl.NewList(items...)
 }
 
-func NewListPtr[T any](items ...T) *List[T] {
-	return kl.NewListPtr(items...)
-}
-
 type Set[T comparable] = ks.Set[T]
 
 func NewSet[T comparable](items ...T) Set[T] {

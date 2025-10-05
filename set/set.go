@@ -58,7 +58,7 @@ func (s *Set[T]) Remove(items ...T) *Set[T] {
 	return s
 }
 
-// Pop removes and returns an arbitrary element from the set.
+// Pop removes and returns a random element from the set.
 // Returns an error if the set is empty.
 func (s *Set[T]) Pop() (T, error) {
 	for item := range *s {
