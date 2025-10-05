@@ -1,3 +1,6 @@
+// Package essentials is a package containing only the most commonly used parts of the keylime-go package.
+// It's made to be imported with . to add its contents to the local namespace.
+// You can completely ignore it tho
 package essentials
 
 import (
