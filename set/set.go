@@ -4,7 +4,7 @@ import (
 	"fmt"
 )
 
-// Set is a generic set of comparable elements implemented as a map[T]struct{}.
+// Set is a generic set of comparable elements implemented as map[T]struct{}.
 type Set[T comparable] map[T]struct{}
 
 // NewSet creates a new Set with the specified items
