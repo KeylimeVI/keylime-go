@@ -9,17 +9,30 @@ import (
 // List is a generic type alias of []T with useful methods and functions
 type List[T any] []T
 
-// NewList creates a new List with the specified values
+// NewList creates a new List with the specified items
 func NewList[T any](items ...T) List[T] {
 	list := List[T](items)
 	return list
 }
 
-// NewListWithCap creates a new List with the specified capacity and values
-func NewListWithCap[T any](capacity int, items ...T) List[T] {
+// NewListPtr creates a pointer to a new List with the specified items
+func NewListPtr[T any](items ...T) *List[T] {
+	list := List[T](items)
+	return &list
+}
+
+// NewListCap creates a new List with the specified capacity and items
+func NewListCap[T any](capacity int, items ...T) List[T] {
 	list := make(List[T], 0, capacity)
 	list = append(list, items...)
 	return list
+}
+
+// NewListCapPtr creates a pointer to a new List with the specified capacity and items
+func NewListCapPtr[T any](capacity int, items ...T) *List[T] {
+	list := make(List[T], 0, capacity)
+	list = append(list, items...)
+	return &list
 }
 
 // Add items to the end of the list
@@ -189,20 +202,20 @@ func (l *List[T]) Shuffle() *List[T] {
 	return l
 }
 
-// Insert values at the specified index
+// Insert items at the specified index
 //
 // Errors: IndexError
-func (l *List[T]) Insert(index int, values ...T) error {
+func (l *List[T]) Insert(index int, items ...T) error {
 	if !l.validIndexLoose(index) {
 		return NewIndexError(index, l.Len())
 	}
 	if index == len(*l) {
-		l.Add(values...)
+		l.Add(items...)
 		return nil
 	}
 	prev := (*l)[:index]
 	after := (*l)[index:]
-	*l = append(prev, values...)
+	*l = append(prev, items...)
 	l.Add(after...)
 	return nil
 }
@@ -259,7 +272,7 @@ func (l *List[T]) Slice(start int, end int) (List[T], error) {
 //
 // Supports method chaining
 func (l *List[T]) Grow(amount int) *List[T] {
-	newList := NewListWithCap[T](amount+l.Cap(), *l...)
+	newList := NewListCap[T](amount+l.Cap(), *l...)
 	*l = newList
 	return l
 }

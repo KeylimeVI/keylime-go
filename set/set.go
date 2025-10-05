@@ -7,7 +7,7 @@ import (
 // Set is a generic set of comparable elements implemented as a map[T]struct{}.
 type Set[T comparable] map[T]struct{}
 
-// NewSet Constructor - returns Set value
+// NewSet creates a new Set with the specified items
 func NewSet[T comparable](items ...T) Set[T] {
 	s := make(Set[T])
 	for _, item := range items {
@@ -16,13 +16,25 @@ func NewSet[T comparable](items ...T) Set[T] {
 	return s
 }
 
-// NewSetWithCap creates a set with the given initial capacity and optional items.
-func NewSetWithCap[T comparable](capacity int, items ...T) Set[T] {
+// NewSetPtr returns a pointer to a new Set with the specified items
+func NewSetPtr[T comparable](items ...T) *Set[T] {
+	s := NewSet[T](items...)
+	return &s
+}
+
+// NewSetCap creates a new Set with the specified capacity and items
+func NewSetCap[T comparable](capacity int, items ...T) Set[T] {
 	s := make(Set[T], capacity)
 	for _, item := range items {
 		s[item] = struct{}{}
 	}
 	return s
+}
+
+// NewSetCapPtr returns a pointer to a new Set with the specified capacity and items
+func NewSetCapPtr[T comparable](capacity int, items ...T) *Set[T] {
+	s := NewSetCap[T](capacity, items...)
+	return &s
 }
 
 // Add values to set

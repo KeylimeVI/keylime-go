@@ -4,8 +4,8 @@ import kl "github.com/KeylimeVI/keylime-go/list"
 
 // Pair is a generic type that holds two values
 type Pair[A any, B any] struct {
-	A any
-	B any
+	A A
+	B B
 }
 
 // NewPair creates a new pair of two values
